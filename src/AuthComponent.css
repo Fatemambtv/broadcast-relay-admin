@@ -1,0 +1,166 @@
+/* AuthComponent.css */
+body {
+  background-color: #121212;
+  color: #ffffff;
+  font-family: Arial, sans-serif;
+}
+
+.auth-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.form-container {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+input {
+  padding: 8px;
+  font-size: 16px;
+  border: 1px solid #444;
+  border-radius: 5px;
+  background-color: #333;
+  color: #fff;
+}
+
+.registerBtn {
+  padding: 10px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  background-color: #61dafb;
+  color: #333;
+  cursor: pointer;
+}
+
+.registerBtn:hover {
+  background-color: #4fa3d1;
+}
+
+.error-message {
+  color: #ff4d4d;
+  margin-top: 10px;
+}
+
+.users-container {
+  margin-top: 20px;
+  gap: 10px;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+.user {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 8px;
+  border: 1px solid #444;
+  border-radius: 5px;
+  background-color: #333;
+  gap: 10px;
+  width: 80vw;
+  max-width: 700px;
+}
+
+.user-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 50px;
+}
+
+.online-status {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #4caf50; /* Green color for online status */
+}
+
+.delete-button,
+.signout-button {
+  padding: 8px;
+  font-size: 14px;
+  border: none;
+  border-radius: 5px;
+  background-color: #d9534f; /* Red color for delete and signout buttons */
+  color: #fff;
+  cursor: pointer;
+}
+
+.delete-button:hover,
+.signout-button:hover {
+  background-color: #c9302c;
+}
+
+
+.password-container {
+  position: relative;
+}
+
+.password {
+  font-family: 'Courier New', Courier, monospace;
+  padding: 5px;
+  border: 1px solid #444;
+  background-color: #333;
+  color: #fff;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.toggle-password {
+  position: relative;
+  right: 0;
+  background: none;
+  border: none;
+  color: #61dafb;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.toggle-password:hover {
+  text-decoration: underline;
+}
+
+.search-bar {
+  padding: 8px;
+  font-size: 16px;
+  border: 1px solid #444;
+  border-radius: 5px;
+  background-color: #333;
+  color: #fff;
+  width: 600px;
+  align-items: start;
+}
+
+.reload {
+  padding: 8px;
+  font-size: 32px;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  cursor: pointer;
+}
+
+@media screen and (max-width: 600px) {
+  .user {
+    flex-direction: column; /* Stack items for mobile */
+  }
+
+  .form-container,
+  .search-bar,
+  .user {
+    width: 100%;
+    max-width: 100%;
+  }
+}
