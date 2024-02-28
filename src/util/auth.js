@@ -1,15 +1,15 @@
 // auth.js
 export const setAuthData = (user) => {
-    localStorage.setItem("authUser", user);
+    localStorage.setItem("authAdmin", user);
 };
 
 export const getAuthData = () => {
-    const authUser = localStorage.getItem("authUser");
+    const authUser = localStorage.getItem("authAdmin");
     return authUser;
 };
 
 export const clearAuthData = () => {
-    localStorage.removeItem("authUser");
+    localStorage.removeItem("authAdmin");
 };
 
 // Add the following functions
