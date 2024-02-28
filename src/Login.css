@@ -1,0 +1,57 @@
+/* Login.css */
+
+.login {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+  font-family: 'Courier New', monospace; /* Retro font */
+}
+
+.login h1 {
+  text-align: center;
+  font-size: 2em; /* Increase heading size */
+  margin-bottom: 1em; /* Add some spacing below the heading */
+  color: #fff; /* Darker text for better legibility */
+}
+
+.login form {
+  display: flex;
+  flex-direction: column;
+  width: 300px; /* Adjust form width based on preference */
+  padding: 20px; /* Add some padding inside the form */
+  margin: 20px;
+}
+
+.login form input {
+  margin-bottom: 10px; /* Add spacing between input fields */
+  padding: 10px;
+  transition: all 0.2s ease-in-out; /* Smooth transition on focus */
+}
+
+.login form button {
+  background-color: #3498db; /* Retro blue button color */
+  color: #fff; /* White text */
+  border: none; /* Remove default border */
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.login form button:hover {
+  background-color: #2980b9; /* Darken button on hover */
+}
+
+.login p.error-message {
+  color: red; /* Error message color */
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+  .login form {
+    width: 250px; /* Adjust form width for smaller screens */
+  }
+}

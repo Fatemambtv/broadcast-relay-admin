@@ -2,10 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { doc, setDoc, collection, getDocs, deleteDoc } from "firebase/firestore";
 import { ref, set, onValue } from "firebase/database";
-import { db, RealTimeDB } from "./util/firebase";
+import { db, Realtimedb } from "./util/firebase";
 import './AuthComponent.css';
+import { AdminControls } from './AdminControls';
 
-const AuthComponent = () => {
+const AuthComponent = ({ isLoggedIn, onLogout }) => {
   const [its, setITS] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -20,7 +21,7 @@ const AuthComponent = () => {
     const fetchOnlineStatusForUsers = async () => {
       try {
         setLoading(true);
-        const onlineStatusRef = ref(RealTimeDB, 'loggedInUsers');
+        const onlineStatusRef = ref(Realtimedb, 'loggedInUsers');
         onValue(onlineStatusRef, (snapshot) => {
           const data = snapshot.val();
           // Set online status for each user
@@ -74,6 +75,10 @@ const AuthComponent = () => {
   );
 
   const handleSignUp = async (its, password, name) => {
+    if (!its || !name) {
+      setError("Please fill all the fields.");
+      return;
+    }
     try {
       await setDoc(doc(db, "users", its), {
         name: name,
@@ -101,7 +106,7 @@ const AuthComponent = () => {
   };
 
   const handleSignOut = async (its) => {
-    await set(ref(RealTimeDB, `/loggedInUsers/${its}/login_status`), false);
+    await set(ref(Realtimedb, `/loggedInUsers/${its}/login_status`), false);
   }
 
   const handleNameChange = (e) => {
@@ -127,29 +132,40 @@ const AuthComponent = () => {
     });
   };
 
+  const handleAdminSignout = async () => {
+    await set(ref(Realtimedb, `/loggedInUsers/admin/login_status`), false);
+    onLogout();
+  }
+
   return (
     <div className="auth-container">
-      <h1>User Authentication</h1>
+      <div className='header'>
+        <h1>Admin Panel</h1>
+        <button className='registerBtn' onClick={handleAdminSignout}>Logout</button>
+      </div>
+      <AdminControls />
+      <div className='admin-controls'>
+        <div className="form-container">
+          <input
+            type="name"
+            placeholder="Name"
+            value={name}
+            onChange={handleNameChange}
+          />
+          <input
+            type="text"
+            placeholder="ITS ID"
+            value={its}
+            maxLength={8}
+            onChange={handleITSChange}
+          />
 
-      <div className="form-container">
-        <input
-          type="name"
-          placeholder="Name"
-          value={name}
-          onChange={handleNameChange}
-        />
-        <input
-          type="text"
-          placeholder="ITS ID"
-          value={its}
-          maxLength={8}
-          onChange={handleITSChange}
-        />
+          <p>Password: {password}</p>
 
-        <p>Password: {password}</p>
-
-        <button className='registerBtn' onClick={() => handleSignUp(its, password, name)}>Register</button>
-        {error && <p className="error-message">{error}</p>}
+          <button className='registerBtn' onClick={() => handleSignUp(its, password, name)}>Register</button>
+          {error && <p className="error-message">{error}</p>}
+        </div>
+        
       </div>
 
       <div className="users-container">
@@ -167,14 +183,19 @@ const AuthComponent = () => {
         ) : (
           filteredUsers.map((user, index) => (
             <div className='user-container' key={user.id}>
-              <span>Last login: {onlineStatus[user.id]?.login_time}</span>
               <li className='user'>
                 <span
                   className="online-status"
                   style={{ backgroundColor: loading ? "#ccc" : onlineStatus[user.id]?.login_status ? "green" : "red" }}
                 ></span>
-                <span>{user.name}</span><hr></hr>
-                <span>{user.id}</span><hr></hr>
+                <div>
+                  <div className='details'>
+                    <span>{user.name}</span><hr></hr>
+                    <span>{user.id}</span><hr></hr>
+                  </div>
+                  <br></br>
+                  <span>Last login: {onlineStatus[user.id]?.login_time}</span>
+                </div>
                 <span className="password-container">
                   <span className="password">{user.showPassword ? user.password : '*****'}</span>
                   <button className="toggle-password" onClick={() => handleTogglePassword(user.id)}>
