@@ -34,12 +34,18 @@
     gap: 10px;
 }
 
-.content {
+.admin-content {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 50px;
     margin-top: 20px;
+}
+
+.server-controls {
+    background-color: #313131;
+    padding: 20px;
+    border-radius: 20px;
 }
   

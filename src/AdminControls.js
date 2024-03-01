@@ -151,7 +151,7 @@ export function AdminControls() {
 
     return (
         <div className='admin-control-container'>
-            <div className='content'>
+            <div className='admin-content'>
                 <div className="form-container">
                     <label htmlFor='loginStatus'>
                         Login Status:
@@ -174,6 +174,7 @@ export function AdminControls() {
                     <button className='registerBtn' onClick={() => updateMiqaatName()}>Update Miqaat Name</button>
 
                 </div>
+                <div className='admin-controls server-controls'>
                 <div className="form-container">
                     <label htmlFor='serverStatusA'>
                         Server A (Custom):
@@ -237,6 +238,7 @@ export function AdminControls() {
                     />
 
                     <button className='registerBtn' onClick={() => updateServerCID()}>SET C</button>
+                </div>
                 </div>
             </div>
             <p>{message}</p>
