@@ -15,6 +15,9 @@ export function AdminControls() {
     const [serverBID, setServerBID] = useState('');
     const [serverBStatus, setServerBStatus] = useState(false);
 
+    const [serverCID, setServerCID] = useState('');
+    const [serverCStatus, setServerCStatus] = useState(false);
+
     useEffect(() => {
         const loginStatusRef = ref(Realtimedb, 'loginStatus');
         onValue(loginStatusRef, (snapshot) => {
@@ -56,6 +59,20 @@ export function AdminControls() {
             const data = snapshot.val();
             setServerBStatus(data);
             document.getElementById('serverStatusB').checked = data;
+        });
+
+        const serverCIDRef = ref(Realtimedb, 'serverCID');
+        onValue(serverCIDRef, (snapshot) => {
+            const data = snapshot.val();
+            setServerCID(data);
+            document.getElementById('serverCID').value = data;
+        });
+
+        const serverCStatusRef = ref(Realtimedb, 'serverCStatus');
+        onValue(serverCStatusRef, (snapshot) => {
+            const data = snapshot.val();
+            setServerCStatus(data);
+            document.getElementById('serverStatusC').checked = data;
         });
 
 
@@ -116,6 +133,22 @@ export function AdminControls() {
         set(ref(Realtimedb, "serverBStatus"), newServerBStatus);
     }
 
+    const updateServerCID = () => {
+        const newServerCID = document.getElementById("serverCID").value;
+        setServerCID(newServerCID);
+        set(ref(Realtimedb, "serverCID"), newServerCID);
+        setMessage("Server C ID Updated");
+        setTimeout(() => {
+            setMessage("");
+        }, 2000);
+    }
+
+    const updateServerCStatus = () => {
+        const newServerCStatus = document.getElementById("serverStatusC").checked;
+        setServerCStatus(newServerCStatus);
+        set(ref(Realtimedb, "serverCStatus"), newServerCStatus);
+    }
+
     return (
         <div className='admin-control-container'>
             <div className='content'>
@@ -143,7 +176,7 @@ export function AdminControls() {
                 </div>
                 <div className="form-container">
                     <label htmlFor='serverStatusA'>
-                        Server A:
+                        Server A (Custom):
                         <input
                             id='serverStatusA'
                             type="checkbox"
@@ -164,7 +197,7 @@ export function AdminControls() {
                 </div>
                 <div className="form-container">
                     <label htmlFor='serverStatusB'>
-                        Server B:
+                        Server B (YT):
                         <input
                             id='serverStatusB'
                             type="checkbox"
@@ -182,6 +215,28 @@ export function AdminControls() {
                     />
 
                     <button className='registerBtn' onClick={() => updateServerBID()}>SET B</button>
+                </div>
+
+                <div className="form-container">
+                    <label htmlFor='serverStatusC'>
+                        Server C (Drive):
+                        <input
+                            id='serverStatusC'
+                            type="checkbox"
+                            value={serverCStatus ? 'true' : 'false'}
+                            onChange={() => updateServerCStatus()}
+                        />
+                    </label>
+
+                    <input
+                        type="text"
+                        placeholder="Drive video ID: 1-C9yYnyDhZGhQEi0gDqv2DbDD13gScGv"
+                        value={serverCID}
+                        onChange={(e) => setServerCID(e.target.value)}
+                        id="serverCID"
+                    />
+
+                    <button className='registerBtn' onClick={() => updateServerCID()}>SET C</button>
                 </div>
             </div>
             <p>{message}</p>
