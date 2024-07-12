@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { ref, set, onValue } from "firebase/database";
-import { Realtimedb } from "./util/firebase";
+import React, {useEffect, useState} from 'react';
+import {onValue, ref, set} from "firebase/database";
+import {Realtimedb} from "./util/firebase";
 import './AdminControls.css';
 
 export function AdminControls() {
@@ -17,6 +17,9 @@ export function AdminControls() {
 
     const [serverCID, setServerCID] = useState('');
     const [serverCStatus, setServerCStatus] = useState(false);
+
+    const [serverDID, setServerDID] = useState('');
+    const [serverDStatus, setServerDStatus] = useState(false);
 
     useEffect(() => {
         const loginStatusRef = ref(Realtimedb, 'loginStatus');
@@ -75,6 +78,19 @@ export function AdminControls() {
             document.getElementById('serverStatusC').checked = data;
         });
 
+        const serverDIDRef = ref(Realtimedb, 'serverDID');
+        onValue(serverDIDRef, (snapshot) => {
+            const data = snapshot.val();
+            setServerDID(data);
+            document.getElementById('serverDID').value = data;
+        });
+
+        const serverDStatusRef = ref(Realtimedb, 'serverDStatus');
+        onValue(serverDStatusRef, (snapshot) => {
+            const data = snapshot.val();
+            setServerDStatus(data);
+            document.getElementById('serverStatusD').checked = data;
+        });
 
     }, [loginStatus]);
 
@@ -149,14 +165,30 @@ export function AdminControls() {
         set(ref(Realtimedb, "serverCStatus"), newServerCStatus);
     }
 
+    const updateServerDID = () => {
+        const newServerDID = document.getElementById("serverDID").value;
+        setServerDID(newServerDID);
+        set(ref(Realtimedb, "serverDID"), newServerDID);
+        setMessage("Server D ID Updated");
+        setTimeout(() => {
+            setMessage("");
+        }, 2000);
+    }
+
+    const updateServerDStatus = () => {
+        const newServerDStatus = document.getElementById("serverStatusD").checked;
+        setServerDStatus(newServerDStatus);
+        set(ref(Realtimedb, "serverDStatus"), newServerDStatus);
+    }
+
     return (
-        <div className='admin-control-container'>
-            <div className='admin-content'>
+        <div className="admin-control-container">
+            <div className="admin-content">
                 <div className="form-container">
-                    <label htmlFor='loginStatus'>
+                    <label htmlFor="loginStatus">
                         Login Status:
                         <input
-                            id='loginStatus'
+                            id="loginStatus"
                             type="checkbox"
                             value={loginStatus ? 'true' : 'false'}
                             onChange={() => updateLoginStatus()}
@@ -171,74 +203,96 @@ export function AdminControls() {
                         id="miqaatName"
                     />
 
-                    <button className='registerBtn' onClick={() => updateMiqaatName()}>Update Miqaat Name</button>
+                    <button className="registerBtn" onClick={() => updateMiqaatName()}>Update Miqaat Name</button>
 
                 </div>
-                <div className='admin-controls server-controls'>
-                <div className="form-container">
-                    <label htmlFor='serverStatusA'>
-                        Server A (Custom):
+                <div className="admin-controls server-controls">
+                    <div className="form-container">
+                        <label htmlFor="serverStatusA">
+                            Server A (Custom):
+                            <input
+                                id="serverStatusA"
+                                type="checkbox"
+                                value={serverAStatus ? 'true' : 'false'}
+                                onChange={() => updateServerAStatus()}
+                            />
+                        </label>
+
                         <input
-                            id='serverStatusA'
-                            type="checkbox"
-                            value={serverAStatus ? 'true' : 'false'}
-                            onChange={() => updateServerAStatus()}
+                            type="text"
+                            placeholder="Server A URL"
+                            value={serverAID}
+                            onChange={(e) => setServerAID(e.target.value)}
+                            id="serverAID"
                         />
-                    </label>
 
-                    <input
-                        type="text"
-                        placeholder="Server A URL"
-                        value={serverAID}
-                        onChange={(e) => setServerAID(e.target.value)}
-                        id="serverAID"
-                    />
+                        <button className="registerBtn" onClick={() => updateServerAID()}>SET A</button>
+                    </div>
+                    <div className="form-container">
+                        <label htmlFor="serverStatusB">
+                            Server B (YT Live Custom):
+                            <input
+                                id="serverStatusB"
+                                type="checkbox"
+                                value={serverBStatus ? 'true' : 'false'}
+                                onChange={() => updateServerBStatus()}
+                            />
+                        </label>
 
-                    <button className='registerBtn' onClick={() => updateServerAID()}>SET A</button>
-                </div>
-                <div className="form-container">
-                    <label htmlFor='serverStatusB'>
-                        Server B (YT):
                         <input
-                            id='serverStatusB'
-                            type="checkbox"
-                            value={serverBStatus ? 'true' : 'false'}
-                            onChange={() => updateServerBStatus()}
+                            type="text"
+                            placeholder="youtube ID: kZwg8U_RCsg"
+                            value={serverBID}
+                            onChange={(e) => setServerBID(e.target.value)}
+                            id="serverBID"
                         />
-                    </label>
 
-                    <input
-                        type="text"
-                        placeholder="youtube ID: kZwg8U_RCsg"
-                        value={serverBID}
-                        onChange={(e) => setServerBID(e.target.value)}
-                        id="serverBID"
-                    />
+                        <button className="registerBtn" onClick={() => updateServerBID()}>SET B</button>
+                    </div>
 
-                    <button className='registerBtn' onClick={() => updateServerBID()}>SET B</button>
-                </div>
+                    <div className="form-container">
+                        <label htmlFor="serverStatusC">
+                            Server C (Drive):
+                            <input
+                                id="serverStatusC"
+                                type="checkbox"
+                                value={serverCStatus ? 'true' : 'false'}
+                                onChange={() => updateServerCStatus()}
+                            />
+                        </label>
 
-                <div className="form-container">
-                    <label htmlFor='serverStatusC'>
-                        Server C (Drive):
                         <input
-                            id='serverStatusC'
-                            type="checkbox"
-                            value={serverCStatus ? 'true' : 'false'}
-                            onChange={() => updateServerCStatus()}
+                            type="text"
+                            placeholder="Drive video ID: 1-C9yYnyDhZGhQEi0gDqv2DbDD13gScGv"
+                            value={serverCID}
+                            onChange={(e) => setServerCID(e.target.value)}
+                            id="serverCID"
                         />
-                    </label>
 
-                    <input
-                        type="text"
-                        placeholder="Drive video ID: 1-C9yYnyDhZGhQEi0gDqv2DbDD13gScGv"
-                        value={serverCID}
-                        onChange={(e) => setServerCID(e.target.value)}
-                        id="serverCID"
-                    />
+                        <button className="registerBtn" onClick={() => updateServerCID()}>SET C</button>
+                    </div>
 
-                    <button className='registerBtn' onClick={() => updateServerCID()}>SET C</button>
-                </div>
+                    <div className="form-container">
+                        <label htmlFor="serverStatusD">
+                            Server D (YT Video):
+                            <input
+                                id="serverStatusD"
+                                type="checkbox"
+                                value={serverDStatus ? 'true' : 'false'}
+                                onChange={() => updateServerDStatus()}
+                            />
+                        </label>
+
+                        <input
+                            type="text"
+                            placeholder="youtube ID: kZwg8U_RCsg"
+                            value={serverDID}
+                            onChange={(e) => setServerDID(e.target.value)}
+                            id="serverDID"
+                        />
+
+                        <button className="registerBtn" onClick={() => updateServerDID()}>SET D</button>
+                    </div>
                 </div>
             </div>
             <p>{message}</p>
