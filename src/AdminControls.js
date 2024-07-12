@@ -230,7 +230,7 @@ export function AdminControls() {
                     </div>
                     <div className="form-container">
                         <label htmlFor="serverStatusB">
-                            Server B (YT Live Custom):
+                            Server B (YT Custom):
                             <input
                                 id="serverStatusB"
                                 type="checkbox"
@@ -274,7 +274,7 @@ export function AdminControls() {
 
                     <div className="form-container">
                         <label htmlFor="serverStatusD">
-                            Server D (YT Video):
+                            Server D (YT):
                             <input
                                 id="serverStatusD"
                                 type="checkbox"
