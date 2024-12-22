@@ -6,7 +6,7 @@ import './AdminControls.css';
 export function AdminControls() {
 
     const [loginStatus, setLoginStatus] = useState(false);
-    const [miqaatName, setMiqaatName] = useState('');
+    const [eventName, setEventName] = useState('');
     const [message, setMessage] = useState('');
 
     const [serverAID, setServerAID] = useState('');
@@ -29,10 +29,10 @@ export function AdminControls() {
             document.getElementById('loginStatus').checked = data;
         });
 
-        const miqaatNameRef = ref(Realtimedb, 'miqaatName');
-        onValue(miqaatNameRef, (snapshot) => {
+        const eventNameRef = ref(Realtimedb, 'miqaatName');
+        onValue(eventNameRef, (snapshot) => {
             const data = snapshot.val();
-            setMiqaatName(data);
+            setEventName(data);
             document.getElementById('miqaatName').value = data;
         });
 
@@ -100,17 +100,17 @@ export function AdminControls() {
         set(ref(Realtimedb, "loginStatus"), newLoginStatus);
     }
 
-    const updateMiqaatName = () => {
-        const miqaatName = document.getElementById('miqaatName').value;
-        if (miqaatName === '') {
-            setMessage("Miqaat Name cannot be empty");
+    const updateEventName = () => {
+        const eventName = document.getElementById('miqaatName').value;
+        if (eventName === '') {
+            setMessage("Event Name cannot be empty");
             setTimeout(() => {
                 setMessage("");
             }, 2000);
             return;
         }
-        set(ref(Realtimedb, 'miqaatName'), miqaatName);
-        setMessage("Miqaat Name Updated");
+        set(ref(Realtimedb, 'miqaatName'), eventName);
+        setMessage("Event Name Updated");
         setTimeout(() => {
             setMessage("");
         }, 2000);
@@ -197,13 +197,13 @@ export function AdminControls() {
 
                     <input
                         type="text"
-                        placeholder="Miqaat Name"
-                        value={miqaatName}
-                        onChange={(e) => setMiqaatName(e.target.value)}
+                        placeholder="Event Name"
+                        value={eventName}
+                        onChange={(e) => setEventName(e.target.value)}
                         id="miqaatName"
                     />
 
-                    <button className="registerBtn" onClick={() => updateMiqaatName()}>Update Miqaat Name</button>
+                    <button className="registerBtn" onClick={() => updateEventName()}>Update Miqaat Name</button>
 
                 </div>
                 <div className="admin-controls server-controls">

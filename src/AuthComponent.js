@@ -36,23 +36,21 @@ const AuthComponent = ({ isLoggedIn, onLogout }) => {
 
     fetchOnlineStatusForUsers();
   }, []);
-
+  const fetchUsers = async () => {
+    try {
+      const usersCollection = collection(db, "users");
+      const usersSnapshot = await getDocs(usersCollection);
+      const usersData = usersSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        showPassword: false,
+      }));
+      setUsers(usersData);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const usersCollection = collection(db, "users");
-        const usersSnapshot = await getDocs(usersCollection);
-        const usersData = usersSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          showPassword: false,
-        }));
-        setUsers(usersData);
-      } catch (err) {
-        setError(err.message);
-      }
-    };
-
     fetchUsers();
   }, []);
 
@@ -85,9 +83,7 @@ const AuthComponent = ({ isLoggedIn, onLogout }) => {
         password: password
       });
       setError("User created successfully....reloading");
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
+      fetchUsers();
     } catch (err) {
       setError(err.message);
     }
@@ -97,9 +93,7 @@ const AuthComponent = ({ isLoggedIn, onLogout }) => {
     try {
       await deleteDoc(doc(db, "users", uid));
       setError("User deleted successfully....reloading");
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
+      fetchUsers();
     } catch (err) {
       setError(err.message);
     }
@@ -177,7 +171,7 @@ const AuthComponent = ({ isLoggedIn, onLogout }) => {
           value={searchTerm}
           onChange={handleSearch}
         />
-        <span className='reload' onClick={() => { window.location.reload() }}>↻</span>
+        <span className='reload' onClick={fetchUsers}>↻</span>
         {filteredUsers.length === 0 ? (
           <p className="no-results-message">No results found.</p>
         ) : (
