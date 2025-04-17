@@ -7,7 +7,9 @@ import { db, Realtimedb } from "./util/firebase";
 function Login({ onLogin }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [isAlreadyLoggedIn, setIsAlreadyLoggedIn] = useState(false);
+    const [error, setError] = useState("");
 
     useEffect(() => {
       const loggedInUsersRef = ref(Realtimedb, "loggedInUsers");
@@ -17,34 +19,31 @@ function Login({ onLogin }) {
             setIsAlreadyLoggedIn(true);
         }
       });
-      }, [username]);
+    }, [username]);
 
     const updateLoginStatus = (username, isLoggedIn, user) => {
-        set(ref(Realtimedb, `loggedInUsers/${username}/login_status`), isLoggedIn)
-        set(ref(Realtimedb, `loggedInUsers/${username}/login_time`), new Date().toLocaleString())
-        set(ref(Realtimedb, `loggedInUsers/${username}/name`), user.name)
+        set(ref(Realtimedb, `loggedInUsers/${username}/login_status`), isLoggedIn);
+        set(ref(Realtimedb, `loggedInUsers/${username}/login_time`), new Date().toLocaleString());
+        set(ref(Realtimedb, `loggedInUsers/${username}/name`), user.name);
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
         if (!username || !password) {
-            const loginError = document.getElementById("login-error");
-            loginError.innerHTML = "Please enter a username and password.";
+            setError("Please enter a username and password.");
             return;
         }
 
         if (username !== "admin") {
-            const loginError = document.getElementById("login-error");
-            loginError.innerHTML = "Unauthorized user. Please contact admin.";
+            setError("Unauthorized user. Please contact admin.");
             return;
         }
 
-        const loginError = document.getElementById("login-error");
-        loginError.innerHTML = "Logging in...";
+        setError("Logging in...");
 
         if (isAlreadyLoggedIn) {
-            loginError.innerHTML = "Only 1 login allowed per user. Please logout from other device and refresh.";
+            setError("Only 1 login allowed per user. Please logout from other device and refresh.");
         } else {
             const docRef = doc(db, "users", username);
             getDoc(docRef)
@@ -55,10 +54,10 @@ function Login({ onLogin }) {
                             onLogin(username);
                             updateLoginStatus(username, true, data);
                         } else {
-                            loginError.innerHTML = "Invalid password.";
+                            setError("Invalid password.");
                         }
                     } else {
-                        loginError.innerHTML = "No such user exists.";
+                        setError("No such user exists.");
                     }
                 })
                 .catch((error) => {
@@ -67,26 +66,60 @@ function Login({ onLogin }) {
         }
     };
 
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
+
     return (
         <div className="login">
-          <h1>Login</h1>
-          <form onSubmit={handleSubmit}>
-            <input
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+            <img 
+                src="https://img.icons8.com/fluency/96/000000/broadcast.png" 
+                alt="Broadcast Relay Logo" 
+                className="login-logo"
             />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <button type="submit">Login</button>
-          </form>
-            <p id="login-error" className="error-message"></p>
+            <h1>Broadcast Relay Admin</h1>
+            <form onSubmit={handleSubmit}>
+                <div className="input-field">
+                    <label htmlFor="username">Username</label>
+                    <div className="input-wrapper">
+                        <input
+                            type="text"
+                            id="username"
+                            placeholder="Enter your username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            required
+                        />
+                    </div>
+                </div>
+                <div className="password-field">
+                    <label htmlFor="password">Password</label>
+                    <div className="input-wrapper">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            id="password"
+                            placeholder="Enter your password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                        <button 
+                            type="button" 
+                            className="toggle-password-btn"
+                            onClick={togglePasswordVisibility}
+                        >
+                            {showPassword ? "Hide" : "Show"}
+                        </button>
+                    </div>
+                </div>
+                <button type="submit">Login</button>
+            </form>
+            {error && <p className="error-message">{error}</p>}
+            <div className="login-footer">
+                <p>© 2023 Broadcast Relay System</p>
+            </div>
         </div>
-      );
+    );
 }
+
 export default Login;

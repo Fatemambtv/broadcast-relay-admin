@@ -1,0 +1,110 @@
+/* App.css - Magical Admin Portal Theme */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #4a86e8;
+  --primary-light: #c9daf8;
+  --primary-dark: #1a56cc;
+  --accent-color: #9fc5e8;
+  --text-color: #333;
+  --text-light: #666;
+  --background: #f3f8ff;
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --success: #6aa84f;
+  --danger: #cc0000;
+  --warning: #f1c232;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--background);
+  color: var(--text-color);
+}
+
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e0f7fa 0%, #bbdefb 50%, #90caf9 100%);
+  background-image: url('https://img.freepik.com/free-vector/network-mesh-wire-digital-technology-background_1017-27428.jpg');
+  background-size: cover;
+  background-position: center;
+  background-blend-mode: overlay;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.content {
+  background-color: var(--card-bg);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  width: 95%;
+  max-width: 1200px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.content::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+  transform: rotate(30deg);
+  pointer-events: none;
+}
+
+.content:hover {
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  transform: translateY(-5px);
+}
+
+.app-title {
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--primary-dark);
+  font-weight: 600;
+  font-size: 2.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.app-subtitle {
+  text-align: center;
+  margin-bottom: 30px;
+  color: var(--text-light);
+  font-weight: 400;
+}
+
+/* Animation for loading states */
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.loading {
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .content {
+    padding: 20px;
+  }
+  
+  .app-title {
+    font-size: 2rem;
+  }
+}

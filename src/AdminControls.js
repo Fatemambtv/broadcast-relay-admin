@@ -181,35 +181,46 @@ export function AdminControls() {
         set(ref(Realtimedb, "serverDStatus"), newServerDStatus);
     }
 
+    // Update the return section of AdminControls.js
+    // Find the return statement and enhance it:
+    
     return (
         <div className="admin-control-container">
+            {message && <div className="message-container show">{message}</div>}
+            
             <div className="admin-content">
-                <div className="form-container">
-                    <label htmlFor="loginStatus">
-                        Login Status:
+                <div className="server-controls">
+                    <h3>System Controls</h3>
+                    <div className="control-group">
+                        <label htmlFor="loginStatus">
+                            <span className={`status-indicator ${loginStatus ? 'status-online' : 'status-offline'}`}></span>
+                            Login Status:
+                            <input
+                                id="loginStatus"
+                                type="checkbox"
+                                value={loginStatus ? 'true' : 'false'}
+                                onChange={() => updateLoginStatus()}
+                            />
+                        </label>
+
                         <input
-                            id="loginStatus"
-                            type="checkbox"
-                            value={loginStatus ? 'true' : 'false'}
-                            onChange={() => updateLoginStatus()}
+                            type="text"
+                            placeholder="Event Name"
+                            value={eventName}
+                            onChange={(e) => setEventName(e.target.value)}
+                            id="miqaatName"
                         />
-                    </label>
 
-                    <input
-                        type="text"
-                        placeholder="Event Name"
-                        value={eventName}
-                        onChange={(e) => setEventName(e.target.value)}
-                        id="miqaatName"
-                    />
-
-                    <button className="registerBtn" onClick={() => updateEventName()}>Update Miqaat Name</button>
-
+                        <button className="registerBtn" onClick={() => updateEventName()}>Update Event Name</button>
+                    </div>
                 </div>
-                <div className="admin-controls server-controls">
-                    <div className="form-container">
+
+                <div className="server-controls">
+                    <h3>Server A Configuration</h3>
+                    <div className="control-group">
                         <label htmlFor="serverStatusA">
-                            Server A (Custom):
+                            <span className={`status-indicator ${serverAStatus ? 'status-online' : 'status-offline'}`}></span>
+                            Server A Status:
                             <input
                                 id="serverStatusA"
                                 type="checkbox"
@@ -220,17 +231,22 @@ export function AdminControls() {
 
                         <input
                             type="text"
-                            placeholder="Server A URL"
+                            placeholder="Server A ID"
                             value={serverAID}
                             onChange={(e) => setServerAID(e.target.value)}
                             id="serverAID"
                         />
 
-                        <button className="registerBtn" onClick={() => updateServerAID()}>SET A</button>
+                        <button className="registerBtn" onClick={() => updateServerAID()}>Update Server A ID</button>
                     </div>
-                    <div className="form-container">
+                </div>
+
+                <div className="server-controls">
+                    <h3>Server B Configuration</h3>
+                    <div className="control-group">
                         <label htmlFor="serverStatusB">
-                            Server B (YT Custom):
+                            <span className={`status-indicator ${serverBStatus ? 'status-online' : 'status-offline'}`}></span>
+                            Server B Status:
                             <input
                                 id="serverStatusB"
                                 type="checkbox"
@@ -241,18 +257,22 @@ export function AdminControls() {
 
                         <input
                             type="text"
-                            placeholder="youtube ID: kZwg8U_RCsg"
+                            placeholder="Server B ID"
                             value={serverBID}
                             onChange={(e) => setServerBID(e.target.value)}
                             id="serverBID"
                         />
 
-                        <button className="registerBtn" onClick={() => updateServerBID()}>SET B</button>
+                        <button className="registerBtn" onClick={() => updateServerBID()}>Update Server B ID</button>
                     </div>
+                </div>
 
-                    <div className="form-container">
+                <div className="server-controls">
+                    <h3>Server C Configuration</h3>
+                    <div className="control-group">
                         <label htmlFor="serverStatusC">
-                            Server C (Drive):
+                            <span className={`status-indicator ${serverCStatus ? 'status-online' : 'status-offline'}`}></span>
+                            Server C Status:
                             <input
                                 id="serverStatusC"
                                 type="checkbox"
@@ -263,18 +283,22 @@ export function AdminControls() {
 
                         <input
                             type="text"
-                            placeholder="Drive video ID: 1-C9yYnyDhZGhQEi0gDqv2DbDD13gScGv"
+                            placeholder="Server C ID"
                             value={serverCID}
                             onChange={(e) => setServerCID(e.target.value)}
                             id="serverCID"
                         />
 
-                        <button className="registerBtn" onClick={() => updateServerCID()}>SET C</button>
+                        <button className="registerBtn" onClick={() => updateServerCID()}>Update Server C ID</button>
                     </div>
+                </div>
 
-                    <div className="form-container">
+                <div className="server-controls">
+                    <h3>Server D Configuration</h3>
+                    <div className="control-group">
                         <label htmlFor="serverStatusD">
-                            Server D (YT):
+                            <span className={`status-indicator ${serverDStatus ? 'status-online' : 'status-offline'}`}></span>
+                            Server D Status:
                             <input
                                 id="serverStatusD"
                                 type="checkbox"
@@ -285,17 +309,16 @@ export function AdminControls() {
 
                         <input
                             type="text"
-                            placeholder="youtube ID: kZwg8U_RCsg"
+                            placeholder="Server D ID"
                             value={serverDID}
                             onChange={(e) => setServerDID(e.target.value)}
                             id="serverDID"
                         />
 
-                        <button className="registerBtn" onClick={() => updateServerDID()}>SET D</button>
+                        <button className="registerBtn" onClick={() => updateServerDID()}>Update Server D ID</button>
                     </div>
                 </div>
             </div>
-            <p>{message}</p>
         </div>
     );
 }

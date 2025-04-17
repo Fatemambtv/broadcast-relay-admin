@@ -131,80 +131,88 @@ const AuthComponent = ({ isLoggedIn, onLogout }) => {
     onLogout();
   }
 
-  return (
-    <div className="auth-container">
-      <div className='header'>
-        <h1>Admin Panel</h1>
-        <button className='registerBtn' onClick={handleAdminSignout}>Logout</button>
-      </div>
-      <AdminControls />
-      <div className='admin-controls'>
-        <div className="form-container">
-          <input
-            type="name"
-            placeholder="Name"
-            value={name}
-            onChange={handleNameChange}
-          />
-          <input
-            type="text"
-            placeholder="ITS ID"
-            value={its}
-            maxLength={8}
-            onChange={handleITSChange}
-          />
-
-          <p>Password: {password}</p>
-
-          <button className='registerBtn' onClick={() => handleSignUp(its, password, name)}>Register</button>
-          {error && <p className="error-message">{error}</p>}
+  // Update just the header part of AuthComponent.js
+  // Find the header div around line 135-139 and replace with:
+  
+    return (
+      <div className="auth-container">
+        <div className='header'>
+          <h1>
+            <img src="https://img.icons8.com/fluency/48/000000/broadcast.png" alt="Admin Icon" />
+            Broadcast Relay Admin Panel
+          </h1>
+          <button className='registerBtn' onClick={handleAdminSignout}>Logout</button>
         </div>
+        <AdminControls />
         
-      </div>
-
-      <div className="users-container">
-        <h2>Users:</h2>
-        <input
-          className='search-bar'
-          type="text"
-          placeholder="Search by Name or ITS ID"
-          value={searchTerm}
-          onChange={handleSearch}
-        />
-        <span className='reload' onClick={fetchUsers}>↻</span>
-        {filteredUsers.length === 0 ? (
-          <p className="no-results-message">No results found.</p>
-        ) : (
-          filteredUsers.map((user, index) => (
-            <div className='user-container' key={user.id}>
-              <li className='user'>
-                <span
-                  className="online-status"
-                  style={{ backgroundColor: loading ? "#ccc" : onlineStatus[user.id]?.login_status ? "green" : "red" }}
-                ></span>
-                <div>
-                  <div className='details'>
-                    <span>{user.name}</span><hr></hr>
-                    <span>{user.id}</span><hr></hr>
+        {/* Rest of the component remains the same */}
+        <div className='admin-controls'>
+          <div className="form-container">
+            <input
+              type="name"
+              placeholder="Name"
+              value={name}
+              onChange={handleNameChange}
+            />
+            <input
+              type="text"
+              placeholder="PRN number"
+              value={its}
+              maxLength={8}
+              onChange={handleITSChange}
+            />
+  
+            <p>Password: {password}</p>
+  
+            <button className='registerBtn' onClick={() => handleSignUp(its, password, name)}>Register</button>
+            {error && <p className="error-message">{error}</p>}
+          </div>
+          
+        </div>
+  
+        <div className="users-container">
+          <h2>Users:</h2>
+          <input
+            className='search-bar'
+            type="text"
+            placeholder="Search by Name or PRN number"
+            value={searchTerm}
+            onChange={handleSearch}
+          />
+          <span className='reload' onClick={fetchUsers}>↻</span>
+          {filteredUsers.length === 0 ? (
+            <p className="no-results-message">No results found.</p>
+          ) : (
+            filteredUsers.map((user, index) => (
+              <div className='user-container' key={user.id}>
+                <li className='user'>
+                  <span
+                    className="online-status"
+                    style={{ backgroundColor: loading ? "#ccc" : onlineStatus[user.id]?.login_status ? "green" : "red" }}
+                  ></span>
+                  <div>
+                    <div className='details'>
+                      <span>{user.name}</span><hr></hr>
+                      <span>{user.id}</span><hr></hr>
+                    </div>
+                    <br></br>
+                    <span>Last login: {onlineStatus[user.id]?.login_time}</span>
                   </div>
-                  <br></br>
-                  <span>Last login: {onlineStatus[user.id]?.login_time}</span>
-                </div>
-                <span className="password-container">
-                  <span className="password">{user.showPassword ? user.password : '*****'}</span>
-                  <button className="toggle-password" onClick={() => handleTogglePassword(user.id)}>
-                    {user.showPassword ? "Hide" : "Show"}
-                  </button>
-                </span>
-                {index < filteredUsers.length - 1 && <div className="column-divider"></div>}
-                <button className="delete-button" onClick={() => handleDeleteUser(user.id)}>Delete</button>
-                <button className="signout-button" onClick={() => handleSignOut(user.id)}>Sign Out</button>
-              </li>
-            </div>
-          )))}
+                  <span className="password-container">
+                    <span className="password">{user.showPassword ? user.password : '*****'}</span>
+                    <button className="toggle-password" onClick={() => handleTogglePassword(user.id)}>
+                      {user.showPassword ? "Hide" : "Show"}
+                    </button>
+                  </span>
+                  {index < filteredUsers.length - 1 && <div className="column-divider"></div>}
+                  <button className="delete-button" onClick={() => handleDeleteUser(user.id)}>Delete</button>
+                  <button className="signout-button" onClick={() => handleSignOut(user.id)}>Sign Out</button>
+                </li>
+              </div>
+            )))}
+        </div>
       </div>
-    </div>
-  );
+    );
 };
 
 export default AuthComponent;

@@ -1,15 +1,18 @@
-/* AuthComponent.css */
+/* AuthComponent.css - Magical Admin Portal Theme */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
 body {
-  background-color: #121212;
-  color: #ffffff;
-  font-family: Arial, sans-serif;
+  background-color: #f3f8ff;
+  color: #333;
+  font-family: 'Poppins', sans-serif;
 }
 
 .auth-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
+  padding: 25px;
+  position: relative;
 }
 
 .header {
@@ -17,57 +20,128 @@ body {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  width: 80vw;
-  max-width: 700px;
-  margin-bottom: 20px;
+  width: 90%;
+  max-width: 1000px;
+  margin-bottom: 25px;
+  background: linear-gradient(135deg, #4a86e8 0%, #1a56cc 100%);
+  padding: 15px 25px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(26, 86, 204, 0.2);
+  color: white;
+}
+
+.header h1 {
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.header h1 img {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
 }
 
 .form-container {
   margin-top: 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
+  background-color: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  width: 90%;
+  max-width: 400px;
 }
 
 .admin-controls {
   display: flex;
   flex-direction: row;
   justify-content: space-around;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 20px;
   width: 100%;
+  margin-bottom: 30px;
 }
 
 input {
-  padding: 8px;
+  padding: 12px 15px;
   font-size: 16px;
-  border: 1px solid #444;
-  border-radius: 5px;
-  background-color: #333;
-  color: #fff;
+  border: 2px solid #d0e1fd;
+  border-radius: 8px;
+  background-color: white;
+  color: #333;
+  transition: all 0.3s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+input:focus {
+  border-color: #4a86e8;
+  box-shadow: 0 0 10px rgba(74, 134, 232, 0.3);
+  outline: none;
 }
 
 .registerBtn {
-  padding: 10px;
+  padding: 12px 20px;
   font-size: 16px;
   border: none;
-  border-radius: 5px;
-  background-color: #61dafb;
-  color: #333;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #4a86e8 0%, #1a56cc 100%);
+  color: white;
   cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(26, 86, 204, 0.2);
+  font-family: 'Poppins', sans-serif;
 }
 
 .registerBtn:hover {
-  background-color: #4fa3d1;
+  background: linear-gradient(135deg, #1a56cc 0%, #0a3b9c 100%);
+  box-shadow: 0 6px 15px rgba(26, 86, 204, 0.3);
+  transform: translateY(-2px);
 }
 
 .error-message {
-  color: #ff4d4d;
+  color: #cc0000;
   margin-top: 10px;
+  padding: 10px 15px;
+  background-color: rgba(255, 235, 235, 0.8);
+  border-radius: 8px;
+  border-left: 4px solid #cc0000;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .users-container {
-  margin-top: 20px;
-  gap: 10px;
+  margin-top: 30px;
+  width: 90%;
+  max-width: 1000px;
+  background-color: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.users-container h2 {
+  color: #1a56cc;
+  margin-bottom: 20px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.users-container h2::before {
+  content: '';
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background-image: url('https://img.icons8.com/color/48/000000/group.png');
+  background-size: contain;
+  margin-right: 10px;
 }
 
 ul {
@@ -80,14 +154,20 @@ ul {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
-  padding: 8px;
-  border: 1px solid #444;
-  border-radius: 5px;
-  background-color: #333;
-  gap: 10px;
-  width: 80vw;
-  max-width: 700px;
+  margin-bottom: 15px;
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+  gap: 15px;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.user:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+  background-color: #f3f8ff;
 }
 
 .user-container {
@@ -95,90 +175,140 @@ ul {
   flex-direction: column;
   align-items: center;
   gap: 10px;
+  width: 100%;
 }
 
 .details {
   display: flex;
   flex-direction: row;
   gap: 40px;
+  align-items: center;
 }
 
 .online-status {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background-color: #4caf50; /* Green color for online status */
+  margin-right: 10px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 }
 
 .delete-button,
 .signout-button {
-  padding: 8px;
+  padding: 8px 15px;
   font-size: 14px;
   border: none;
-  border-radius: 5px;
-  background-color: #d9534f; /* Red color for delete and signout buttons */
-  color: #fff;
+  border-radius: 6px;
+  background-color: #cc0000;
+  color: white;
   cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .delete-button:hover,
 .signout-button:hover {
-  background-color: #c9302c;
+  background-color: #aa0000;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
-
 
 .password-container {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .password {
   font-family: 'Courier New', Courier, monospace;
-  padding: 5px;
-  border: 1px solid #444;
-  background-color: #333;
-  color: #fff;
-  border-radius: 5px;
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  background-color: white;
+  color: #333;
+  border-radius: 6px;
   margin-right: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
 }
 
 .toggle-password {
-  position: relative;
-  right: 0;
   background: none;
   border: none;
-  color: #61dafb;
+  color: #4a86e8;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .toggle-password:hover {
+  color: #1a56cc;
   text-decoration: underline;
 }
 
 .search-bar {
-  padding: 8px;
+  padding: 12px 15px;
   font-size: 16px;
-  border: 1px solid #444;
-  border-radius: 5px;
-  background-color: #333;
-  color: #fff;
-  width: 600px;
-  align-items: start;
-  margin-bottom: 50px;
+  border: 2px solid #d0e1fd;
+  border-radius: 8px;
+  background-color: white;
+  color: #333;
+  width: 100%;
+  margin-bottom: 20px;
+  background-image: url('https://img.icons8.com/ios/50/000000/search--v1.png');
+  background-size: 20px;
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  padding-left: 40px;
+}
+
+.search-bar:focus {
+  border-color: #4a86e8;
+  box-shadow: 0 0 10px rgba(74, 134, 232, 0.3);
+  outline: none;
 }
 
 .reload {
   padding: 8px;
-  font-size: 32px;
+  font-size: 24px;
   border: none;
-  border-radius: 5px;
-  color: #fff;
+  border-radius: 50%;
+  color: #4a86e8;
   cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-block;
+  margin-left: 10px;
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  line-height: 24px;
 }
 
-@media screen and (max-width: 600px) {
+.reload:hover {
+  color: #1a56cc;
+  transform: rotate(180deg);
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.no-results-message {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
   .user {
-    flex-direction: column; /* Stack items for mobile */
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .form-container,
@@ -186,5 +316,18 @@ ul {
   .user {
     width: 100%;
     max-width: 100%;
+  }
+  
+  .details {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+    padding: 15px;
   }
 }
