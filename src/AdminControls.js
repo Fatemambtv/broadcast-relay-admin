@@ -29,11 +29,11 @@ export function AdminControls() {
             document.getElementById('loginStatus').checked = data;
         });
 
-        const eventNameRef = ref(Realtimedb, 'miqaatName');
+        const eventNameRef = ref(Realtimedb, 'eventName');
         onValue(eventNameRef, (snapshot) => {
             const data = snapshot.val();
             setEventName(data);
-            document.getElementById('miqaatName').value = data;
+            document.getElementById('eventName').value = data;
         });
 
         const serverAIDRef = ref(Realtimedb, 'serverAID');
@@ -101,7 +101,7 @@ export function AdminControls() {
     }
 
     const updateEventName = () => {
-        const eventName = document.getElementById('miqaatName').value;
+        const eventName = document.getElementById('eventName').value;
         if (eventName === '') {
             setMessage("Event Name cannot be empty");
             setTimeout(() => {
@@ -109,7 +109,7 @@ export function AdminControls() {
             }, 2000);
             return;
         }
-        set(ref(Realtimedb, 'miqaatName'), eventName);
+        set(ref(Realtimedb, 'eventName'), eventName);
         setMessage("Event Name Updated");
         setTimeout(() => {
             setMessage("");
@@ -208,7 +208,7 @@ export function AdminControls() {
                             placeholder="Event Name"
                             value={eventName}
                             onChange={(e) => setEventName(e.target.value)}
-                            id="miqaatName"
+                            id="eventName"
                         />
 
                         <button className="registerBtn" onClick={() => updateEventName()}>Update Event Name</button>
