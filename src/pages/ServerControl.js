@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ref, onValue, set } from "firebase/database";
+import { ref, onValue, set, off } from "firebase/database";  // Added 'off' import
 import { Realtimedb } from "../util/firebase";
 import LoadingSpinner from '../components/LoadingSpinner';
 import './ServerControl.css';
@@ -26,83 +26,90 @@ const ServerControl = () => {
   useEffect(() => {
     setLoading(true);
 
-    // Listen to loginStatus
+    // Create refs for all server data
     const loginStatusRef = ref(Realtimedb, 'loginStatus');
+    const eventNameRef = ref(Realtimedb, 'miqaatName');
+    const serverAIDRef = ref(Realtimedb, 'serverAID');
+    const serverAStatusRef = ref(Realtimedb, 'serverAStatus');
+    const serverBIDRef = ref(Realtimedb, 'serverBID');
+    const serverBStatusRef = ref(Realtimedb, 'serverBStatus');
+    const serverCIDRef = ref(Realtimedb, 'serverCID');
+    const serverCStatusRef = ref(Realtimedb, 'serverCStatus');
+    const serverDIDRef = ref(Realtimedb, 'serverDID');
+    const serverDStatusRef = ref(Realtimedb, 'serverDStatus');
+
+    // Listen to loginStatus
     onValue(loginStatusRef, (snapshot) => {
       const data = snapshot.val() || false;
       setLoginStatus(data);
-      document.getElementById('loginStatus').checked = data;
     });
 
-    // Listen to event name (miqaatName)
-    const eventNameRef = ref(Realtimedb, 'miqaatName');
+    // Listen to event name
     onValue(eventNameRef, (snapshot) => {
       const data = snapshot.val() || '';
       setEventName(data);
-      document.getElementById('eventName').value = data;
     });
 
     // Listen to server A data
-    const serverAIDRef = ref(Realtimedb, 'serverAID');
     onValue(serverAIDRef, (snapshot) => {
       const data = snapshot.val() || '';
       setServerAID(data);
-      document.getElementById('serverAID').value = data;
     });
 
-    const serverAStatusRef = ref(Realtimedb, 'serverAStatus');
     onValue(serverAStatusRef, (snapshot) => {
       const data = snapshot.val() || false;
       setServerAStatus(data);
-      document.getElementById('serverStatusA').checked = data;
     });
 
     // Listen to server B data
-    const serverBIDRef = ref(Realtimedb, 'serverBID');
     onValue(serverBIDRef, (snapshot) => {
       const data = snapshot.val() || '';
       setServerBID(data);
-      document.getElementById('serverBID').value = data;
     });
 
-    const serverBStatusRef = ref(Realtimedb, 'serverBStatus');
     onValue(serverBStatusRef, (snapshot) => {
       const data = snapshot.val() || false;
       setServerBStatus(data);
-      document.getElementById('serverStatusB').checked = data;
     });
 
     // Listen to server C data
-    const serverCIDRef = ref(Realtimedb, 'serverCID');
     onValue(serverCIDRef, (snapshot) => {
       const data = snapshot.val() || '';
       setServerCID(data);
-      document.getElementById('serverCID').value = data;
     });
 
-    const serverCStatusRef = ref(Realtimedb, 'serverCStatus');
     onValue(serverCStatusRef, (snapshot) => {
       const data = snapshot.val() || false;
       setServerCStatus(data);
-      document.getElementById('serverStatusC').checked = data;
     });
 
     // Listen to server D data
-    const serverDIDRef = ref(Realtimedb, 'serverDID');
     onValue(serverDIDRef, (snapshot) => {
       const data = snapshot.val() || '';
       setServerDID(data);
-      document.getElementById('serverDID').value = data;
     });
 
-    const serverDStatusRef = ref(Realtimedb, 'serverDStatus');
     onValue(serverDStatusRef, (snapshot) => {
       const data = snapshot.val() || false;
       setServerDStatus(data);
-      document.getElementById('serverStatusD').checked = data;
     });
 
     setLoading(false);
+
+    // Cleanup function
+    return () => {
+      // Remove all listeners
+      off(loginStatusRef);
+      off(eventNameRef);
+      off(serverAIDRef);
+      off(serverAStatusRef);
+      off(serverBIDRef);
+      off(serverBStatusRef);
+      off(serverCIDRef);
+      off(serverCStatusRef);
+      off(serverDIDRef);
+      off(serverDStatusRef);
+    };
   }, []);
 
   const showMessage = (msg) => {
@@ -138,7 +145,7 @@ const ServerControl = () => {
   };
 
   const updateServerAStatus = () => {
-    const newServerAStatus = document.getElementById("serverStatusA").checked;
+    const newServerAStatus = !serverAStatus;  // Use the state directly instead of DOM
     setServerAStatus(newServerAStatus);
     set(ref(Realtimedb, "serverAStatus"), newServerAStatus);
     showMessage(`Server A ${newServerAStatus ? 'activated' : 'deactivated'} successfully!`);
