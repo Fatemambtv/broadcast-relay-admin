@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ref, onValue, set } from "firebase/database";
+import { ref, onValue, set, off } from "firebase/database";  // Added 'off' import
 import { Realtimedb } from "../util/firebase";
 import LoadingSpinner from '../components/LoadingSpinner';
 import './ServerControl.css';
@@ -24,197 +24,173 @@ const ServerControl = () => {
   const [loginStatus, setLoginStatus] = useState(false);
 
   useEffect(() => {
-    const fetchServerData = async () => {
-      try {
-        setLoading(true);
-        const serverRef = ref(Realtimedb, 'servers');
-        onValue(serverRef, (snapshot) => {
-          const data = snapshot.val() || {};
-          
-          // Set event name
-          setEventName(data.event_name || '');
-          
-          // Set server A data
-          if (data.server_a) {
-            setServerAID(data.server_a.id || '');
-            setServerAStatus(data.server_a.status || false);
-          }
-          
-          // Set server B data
-          if (data.server_b) {
-            setServerBID(data.server_b.id || '');
-            setServerBStatus(data.server_b.status || false);
-          }
-          
-          // Set server C data
-          if (data.server_c) {
-            setServerCID(data.server_c.id || '');
-            setServerCStatus(data.server_c.status || false);
-          }
-          
-          // Set server D data
-          if (data.server_d) {
-            setServerDID(data.server_d.id || '');
-            setServerDStatus(data.server_d.status || false);
-          }
-          
-          // Set login status
-          setLoginStatus(data.login_status || false);
-          
-          setLoading(false);
-        });
-      } catch (error) {
-        console.error("Error fetching server data:", error);
-        setLoading(false);
-      }
-    };
+    setLoading(true);
 
-    fetchServerData();
+    // Create refs for all server data
+    const loginStatusRef = ref(Realtimedb, 'loginStatus');
+    const eventNameRef = ref(Realtimedb, 'miqaatName');
+    const serverAIDRef = ref(Realtimedb, 'serverAID');
+    const serverAStatusRef = ref(Realtimedb, 'serverAStatus');
+    const serverBIDRef = ref(Realtimedb, 'serverBID');
+    const serverBStatusRef = ref(Realtimedb, 'serverBStatus');
+    const serverCIDRef = ref(Realtimedb, 'serverCID');
+    const serverCStatusRef = ref(Realtimedb, 'serverCStatus');
+    const serverDIDRef = ref(Realtimedb, 'serverDID');
+    const serverDStatusRef = ref(Realtimedb, 'serverDStatus');
+
+    // Listen to loginStatus
+    onValue(loginStatusRef, (snapshot) => {
+      const data = snapshot.val() || false;
+      setLoginStatus(data);
+    });
+
+    // Listen to event name
+    onValue(eventNameRef, (snapshot) => {
+      const data = snapshot.val() || '';
+      setEventName(data);
+    });
+
+    // Listen to server A data
+    onValue(serverAIDRef, (snapshot) => {
+      const data = snapshot.val() || '';
+      setServerAID(data);
+    });
+
+    onValue(serverAStatusRef, (snapshot) => {
+      const data = snapshot.val() || false;
+      setServerAStatus(data);
+    });
+
+    // Listen to server B data
+    onValue(serverBIDRef, (snapshot) => {
+      const data = snapshot.val() || '';
+      setServerBID(data);
+    });
+
+    onValue(serverBStatusRef, (snapshot) => {
+      const data = snapshot.val() || false;
+      setServerBStatus(data);
+    });
+
+    // Listen to server C data
+    onValue(serverCIDRef, (snapshot) => {
+      const data = snapshot.val() || '';
+      setServerCID(data);
+    });
+
+    onValue(serverCStatusRef, (snapshot) => {
+      const data = snapshot.val() || false;
+      setServerCStatus(data);
+    });
+
+    // Listen to server D data
+    onValue(serverDIDRef, (snapshot) => {
+      const data = snapshot.val() || '';
+      setServerDID(data);
+    });
+
+    onValue(serverDStatusRef, (snapshot) => {
+      const data = snapshot.val() || false;
+      setServerDStatus(data);
+    });
+
+    setLoading(false);
+
+    // Cleanup function
+    return () => {
+      // Remove all listeners
+      off(loginStatusRef);
+      off(eventNameRef);
+      off(serverAIDRef);
+      off(serverAStatusRef);
+      off(serverBIDRef);
+      off(serverBStatusRef);
+      off(serverCIDRef);
+      off(serverCStatusRef);
+      off(serverDIDRef);
+      off(serverDStatusRef);
+    };
   }, []);
 
   const showMessage = (msg) => {
     setMessage(msg);
     setTimeout(() => {
       setMessage('');
-    }, 3000);
+    }, 2000); // Match AdminControls timeout
   };
 
-  const updateEventName = async () => {
-    try {
-      await set(ref(Realtimedb, 'servers/event_name'), eventName);
-      showMessage('Event name updated successfully!');
-    } catch (error) {
-      console.error("Error updating event name:", error);
-      showMessage('Error updating event name.');
-    }
+  const updateLoginStatus = () => {
+    const newLoginStatus = document.getElementById("loginStatus").checked;
+    setLoginStatus(newLoginStatus);
+    set(ref(Realtimedb, "loginStatus"), newLoginStatus);
+    showMessage(`Login ${newLoginStatus ? 'enabled' : 'disabled'} successfully!`);
   };
 
-  const updateLoginStatus = async () => {
-    try {
-      const newStatus = !loginStatus;
-      await set(ref(Realtimedb, 'servers/login_status'), newStatus);
-      setLoginStatus(newStatus);
-      showMessage(`Login ${newStatus ? 'enabled' : 'disabled'} successfully!`);
-    } catch (error) {
-      console.error("Error updating login status:", error);
-      showMessage('Error updating login status.');
+  const updateEventName = () => {
+    const eventNameInput = document.getElementById('eventName').value;
+    if (eventNameInput === '') {
+      showMessage("Event Name cannot be empty");
+      return;
     }
+    set(ref(Realtimedb, 'miqaatName'), eventNameInput);
+    setEventName(eventNameInput);
+    showMessage("Event Name Updated");
   };
 
-  const updateServerAStatus = async () => {
-    try {
-      setLoading(true);
-      setMessage('');
-      
-      // Update both locations for backward compatibility
-      await set(ref(Realtimedb, 'servers/server_a/status'), !serverAStatus);
-      await set(ref(Realtimedb, 'serverAStatus'), !serverAStatus);
-      
-      setServerAStatus(!serverAStatus);
-      setMessage(`Server A ${!serverAStatus ? 'activated' : 'deactivated'} successfully!`);
-    } catch (error) {
-      console.error("Error toggling Server A:", error);
-      setMessage(`Error: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
+  const updateServerAID = () => {
+    const newServerAID = document.getElementById("serverAID").value;
+    setServerAID(newServerAID);
+    set(ref(Realtimedb, "serverAID"), newServerAID);
+    showMessage("Server A ID Updated");
   };
 
-  const updateServerBStatus = async () => {
-    try {
-      setLoading(true);
-      setMessage('');
-      
-      // Update both locations for backward compatibility
-      await set(ref(Realtimedb, 'servers/server_b/status'), !serverBStatus);
-      await set(ref(Realtimedb, 'serverBStatus'), !serverBStatus);
-      
-      setServerBStatus(!serverBStatus);
-      setMessage(`Server B ${!serverBStatus ? 'activated' : 'deactivated'} successfully!`);
-    } catch (error) {
-      console.error("Error toggling Server B:", error);
-      setMessage(`Error: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
+  const updateServerAStatus = () => {
+    const newServerAStatus = !serverAStatus;  // Use the state directly instead of DOM
+    setServerAStatus(newServerAStatus);
+    set(ref(Realtimedb, "serverAStatus"), newServerAStatus);
+    showMessage(`Server A ${newServerAStatus ? 'activated' : 'deactivated'} successfully!`);
   };
 
-  const updateServerCStatus = async () => {
-    try {
-      setLoading(true);
-      setMessage('');
-      
-      // Update both locations for backward compatibility
-      await set(ref(Realtimedb, 'servers/server_c/status'), !serverCStatus);
-      await set(ref(Realtimedb, 'serverCStatus'), !serverCStatus);
-      
-      setServerCStatus(!serverCStatus);
-      setMessage(`Server C ${!serverCStatus ? 'activated' : 'deactivated'} successfully!`);
-    } catch (error) {
-      console.error("Error toggling Server C:", error);
-      setMessage(`Error: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
+  const updateServerBID = () => {
+    const newServerBID = document.getElementById("serverBID").value;
+    setServerBID(newServerBID);
+    set(ref(Realtimedb, "serverBID"), newServerBID);
+    showMessage("Server B ID Updated");
   };
 
-  const updateServerDStatus = async () => {
-    try {
-      setLoading(true);
-      setMessage('');
-      
-      // Update both locations for backward compatibility
-      await set(ref(Realtimedb, 'servers/server_d/status'), !serverDStatus);
-      await set(ref(Realtimedb, 'serverDStatus'), !serverDStatus);
-      
-      setServerDStatus(!serverDStatus);
-      setMessage(`Server D ${!serverDStatus ? 'activated' : 'deactivated'} successfully!`);
-    } catch (error) {
-      console.error("Error toggling Server D:", error);
-      setMessage(`Error: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
+  const updateServerBStatus = () => {
+    const newServerBStatus = document.getElementById("serverStatusB").checked;
+    setServerBStatus(newServerBStatus);
+    set(ref(Realtimedb, "serverBStatus"), newServerBStatus);
+    showMessage(`Server B ${newServerBStatus ? 'activated' : 'deactivated'} successfully!`);
   };
 
-  const updateServerAID = async () => {
-    try {
-      await set(ref(Realtimedb, 'servers/server_a/id'), serverAID);
-      showMessage('Server A ID updated successfully!');
-    } catch (error) {
-      console.error("Error updating Server A ID:", error);
-      showMessage('Error updating Server A ID.');
-    }
+  const updateServerCID = () => {
+    const newServerCID = document.getElementById("serverCID").value;
+    setServerCID(newServerCID);
+    set(ref(Realtimedb, "serverCID"), newServerCID);
+    showMessage("Server C ID Updated");
   };
 
-  const updateServerBID = async () => {
-    try {
-      await set(ref(Realtimedb, 'servers/server_b/id'), serverBID);
-      showMessage('Server B ID updated successfully!');
-    } catch (error) {
-      console.error("Error updating Server B ID:", error);
-      showMessage('Error updating Server B ID.');
-    }
+  const updateServerCStatus = () => {
+    const newServerCStatus = document.getElementById("serverStatusC").checked;
+    setServerCStatus(newServerCStatus);
+    set(ref(Realtimedb, "serverCStatus"), newServerCStatus);
+    showMessage(`Server C ${newServerCStatus ? 'activated' : 'deactivated'} successfully!`);
   };
 
-  const updateServerCID = async () => {
-    try {
-      await set(ref(Realtimedb, 'servers/server_c/id'), serverCID);
-      showMessage('Server C ID updated successfully!');
-    } catch (error) {
-      console.error("Error updating Server C ID:", error);
-      showMessage('Error updating Server C ID.');
-    }
+  const updateServerDID = () => {
+    const newServerDID = document.getElementById("serverDID").value;
+    setServerDID(newServerDID);
+    set(ref(Realtimedb, "serverDID"), newServerDID);
+    showMessage("Server D ID Updated");
   };
 
-  const updateServerDID = async () => {
-    try {
-      await set(ref(Realtimedb, 'servers/server_d/id'), serverDID);
-      showMessage('Server D ID updated successfully!');
-    } catch (error) {
-      console.error("Error updating Server D ID:", error);
-      showMessage('Error updating Server D ID.');
-    }
+  const updateServerDStatus = () => {
+    const newServerDStatus = document.getElementById("serverStatusD").checked;
+    setServerDStatus(newServerDStatus);
+    set(ref(Realtimedb, "serverDStatus"), newServerDStatus);
+    showMessage(`Server D ${newServerDStatus ? 'activated' : 'deactivated'} successfully!`);
   };
 
   if (loading) {
@@ -258,7 +234,6 @@ const ServerControl = () => {
           </div>
         </div>
         
-        {/* Server cards continue... */}
         <div className="server-card">
           <h2>Server A</h2>
           <div className="control-group">
@@ -289,7 +264,6 @@ const ServerControl = () => {
           </div>
         </div>
         
-        {/* Remaining server cards... */}
         <div className="server-card">
           <h2>Server B</h2>
           <div className="control-group">
