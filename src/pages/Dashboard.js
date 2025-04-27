@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ref, onValue } from "firebase/database";
-import { Realtimedb } from "../util/firebase";
+import { collection, getDocs } from "firebase/firestore";
+import { Realtimedb, db } from "../util/firebase";
 import LoadingSpinner from '../components/LoadingSpinner';
 import './Dashboard.css';
 
@@ -17,7 +18,14 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // Fetch users data
+        // Fetch all registered users from Firestore
+        const usersCollection = collection(db, "users");
+        const usersSnapshot = await getDocs(usersCollection);
+        const totalRegisteredUsers = usersSnapshot.docs
+          .filter(doc => doc.id !== 'admin') // Exclude admin user
+          .length;
+        
+        // Fetch online users data from Realtime DB
         const usersRef = ref(Realtimedb, 'loggedInUsers');
         onValue(usersRef, (snapshot) => {
           const data = snapshot.val() || {};
@@ -32,7 +40,7 @@ const Dashboard = () => {
             const eventName = serverData.event_name || 'No Event';
             
             setStats({
-              totalUsers: users.length,
+              totalUsers: totalRegisteredUsers,
               onlineUsers,
               activeServers,
               totalServers: 4,

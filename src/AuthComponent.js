@@ -156,7 +156,7 @@ const AuthComponent = ({ isLoggedIn, onLogout }) => {
             />
             <input
               type="text"
-              placeholder="PRN number"
+              placeholder="User ID"
               value={its}
               maxLength={8}
               onChange={handleITSChange}
@@ -175,7 +175,7 @@ const AuthComponent = ({ isLoggedIn, onLogout }) => {
           <input
             className='search-bar'
             type="text"
-            placeholder="Search by Name or PRN number"
+            placeholder="Search by Name or User ID"
             value={searchTerm}
             onChange={handleSearch}
           />

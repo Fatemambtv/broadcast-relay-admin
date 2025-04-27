@@ -197,6 +197,33 @@ const UserManagement = () => {
       setLoading(false);
     }
   }
+  
+  // Add new function to handle password change
+  const handleChangePassword = async (userId) => {
+    const newPassword = prompt("Enter new password for user:");
+    
+    if (!newPassword) {
+      setError("Password change cancelled.");
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      await setDoc(doc(db, "users", userId), {
+        name: users.find(user => user.id === userId).name,
+        password: newPassword
+      }, { merge: true });
+      
+      setSuccess(`Password for ${userId} changed successfully!`);
+      setError(null);
+      fetchUsers();
+    } catch (err) {
+      setError(err.message);
+      setSuccess(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleNameChange = (e) => {
     const newName = e.target.value;
@@ -225,80 +252,99 @@ const UserManagement = () => {
     <div className="user-management-container">
       <h1 className="page-title">User Management</h1>
       
-      <div className="user-form-container">
+      {/* Message displays */}
+      {error && <div className="error-message show">{error}</div>}
+      {success && <div className="success-message show">{success}</div>}
+      
+      {/* User registration form */}
+      <div className="user-form-card">
         <h2>Add New User</h2>
         <div className="user-form">
           <div className="form-group">
             <label htmlFor="name">Full Name</label>
             <input
-              id="name"
               type="text"
-              placeholder="Enter full name"
+              id="name"
+              placeholder="Enter user's full name"
               value={name}
               onChange={handleNameChange}
             />
           </div>
           
           <div className="form-group">
-            <label htmlFor="its">PRN number</label>
+            <label htmlFor="its">User ID</label>
             <input
-              id="its"
               type="text"
-              placeholder="Enter PRN number"
+              id="its"
+              placeholder="Enter user ID"
               value={its}
-              maxLength={16}
               onChange={handleITSChange}
+              maxLength={8}
             />
           </div>
           
           <div className="form-group">
             <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="text"
-              placeholder="Password will be generated"
-              value={password}
-              readOnly
-              className="generated-password"
-            />
+            <div className="password-field">
+              <input
+                type="text"
+                id="password"
+                placeholder="Password will be generated"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                readOnly={false}
+              />
+              <button 
+                className="generate-btn"
+                onClick={() => generatePassword(name, its)}
+                title="Generate Password"
+              >
+                <i className="fas fa-sync-alt"></i>
+              </button>
+            </div>
           </div>
           
           <button 
-            className="btn-primary" 
+            className="btn-primary"
             onClick={() => handleSignUp(its, password, name)}
             disabled={loading}
           >
-            {loading ? 'Creating...' : 'Create User'}
+            {loading ? <LoadingSpinner size="small" color="white" text="" /> : 'Add User'}
           </button>
-          
-          {error && <p className="error-message">{error}</p>}
-          {success && <p className="success-message">{success}</p>}
         </div>
       </div>
       
-      <div className="users-list-container">
+      {/* User list section */}
+      <div className="users-list-card">
         <div className="users-header">
-          <h2>Manage Users</h2>
-          <div className="search-container">
-            <input
-              className="search-bar"
-              type="text"
-              placeholder="Search by Name or PRN number"
-              value={searchTerm}
-              onChange={handleSearch}
-            />
-            <button className="reload-btn" onClick={fetchUsers} title="Refresh user list">
-              <HiOutlineRefresh size={20} />
+          <h2>Registered Users</h2>
+          <div className="users-actions">
+            <div className="search-container">
+              <input
+                type="text"
+                placeholder="Search by name or ID..."
+                value={searchTerm}
+                onChange={handleSearch}
+              />
+            </div>
+            <button 
+              className="reload-btn" 
+              onClick={fetchUsers}
+              title="Refresh user list"
+            >
+              <HiOutlineRefresh />
             </button>
           </div>
         </div>
         
         {loading ? (
-          <LoadingSpinner size="medium" text="Loading users..." />
+          <LoadingSpinner text="Loading users..." />
         ) : (
           <>
             {filteredUsers.length === 0 ? (
-              <p className="no-results-message">No users found.</p>
+              <div className="no-users-message">
+                <p>No users found.</p>
+              </div>
             ) : (
               <div className="users-table-container">
                 <table className="users-table">
@@ -306,33 +352,42 @@ const UserManagement = () => {
                     <tr>
                       <th>Status</th>
                       <th>Name</th>
-                      <th>PRN number</th>
+                      <th>User ID</th>
                       <th>Password</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredUsers.map((user) => (
-                      <tr key={user.id}>
+                    {filteredUsers.map(user => (
+                      <tr key={user.id} className={onlineStatus[user.id]?.login_status ? 'user-online' : ''}>
                         <td>
-                          <span
-                            className={`status-indicator ${onlineStatus[user.id]?.login_status ? 'online' : 'offline'}`}
+                          <span 
+                            className="status-indicator" 
+                            style={{ 
+                              backgroundColor: onlineStatus[user.id]?.login_status ? '#2ecc71' : '#e74c3c' 
+                            }}
                             title={onlineStatus[user.id]?.login_status ? 'Online' : 'Offline'}
                           ></span>
                         </td>
                         <td>{user.name}</td>
                         <td>{user.id}</td>
                         <td className="password-cell">
-                          <div className="password-display">
-                            <span className={user.showPassword ? 'visible-password' : 'hidden-password'}>
-                              {user.showPassword ? user.password : '••••••'}
-                            </span>
+                          <div className="password-container">
+                            <span>{user.showPassword ? user.password : '••••••••'}</span>
                             <button 
                               className="password-visibility-toggle" 
                               onClick={() => handleTogglePassword(user.id)}
                               title={user.showPassword ? "Hide password" : "Show password"}
                             >
-                              {user.showPassword ? <IoEyeOffOutline size={18} /> : <IoEyeOutline size={18} />}
+                              {user.showPassword ? <IoEyeOffOutline /> : <IoEyeOutline />}
+                            </button>
+                            {/* Add password change button */}
+                            <button 
+                              className="btn-action btn-change-password" 
+                              onClick={() => handleChangePassword(user.id)}
+                              title="Change password"
+                            >
+                              <i className="fas fa-key"></i>
                             </button>
                           </div>
                         </td>
@@ -343,7 +398,7 @@ const UserManagement = () => {
                               onClick={() => handleSignOut(user.id)}
                               title="Sign out user"
                             >
-                              <CgLogOut size={18} />
+                              <CgLogOut />
                             </button>
                           )}
                           <button 
@@ -351,7 +406,7 @@ const UserManagement = () => {
                             onClick={() => handleDeleteUser(user.id)}
                             title="Delete user"
                           >
-                            <RiDeleteBinLine size={18} />
+                            <RiDeleteBinLine />
                           </button>
                         </td>
                       </tr>

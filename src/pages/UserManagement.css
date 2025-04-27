@@ -402,41 +402,141 @@
   color: white;
   transform: rotate(180deg);
   box-shadow: 0 4px 8px rgba(46, 204, 113, 0.3);
-}.btn-action {
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 8px;
-  margin: 0 4px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  color: #555;
+}.btn-change-password {
+  color: #8e44ad;
+  border-color: #8e44ad;
+  margin-left: 5px;
 }
 
-.btn-action:nth-child(1) {
-  color: #3498db;
-  border-color: #3498db;
-}
-
-.btn-action:nth-child(1):hover {
-  background: #3498db;
+.btn-change-password:hover {
+  background: #8e44ad;
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+  box-shadow: 0 4px 8px rgba(142, 68, 173, 0.3);
 }
 
+.password-container {
+  display: flex;
+  align-items: center;
+}
+.user-form-card {
+  margin-bottom: 2.5rem;
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* Fix users list card */
+.users-list-card {
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* Improve header layout */
+.users-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: nowrap;
+}
+
+/* Fix search container */
+.users-actions {
+  display: flex;
+  align-items: center;
+  width: auto;
+  max-width: none;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 300px;
+}
+
+/* Make table more compact */
+.users-table th, .users-table td {
+  padding: 0.5rem 0.75rem;
+  white-space: nowrap;
+}
+
+/* Adjust column widths to prevent horizontal scrolling */
+.users-table th:nth-child(1), .users-table td:nth-child(1) {
+  width: 5%;
+}
+
+.users-table th:nth-child(2), .users-table td:nth-child(2) {
+  width: 25%;
+}
+
+.users-table th:nth-child(3), .users-table td:nth-child(3) {
+  width: 20%;
+}
+
+.users-table th:nth-child(4), .users-table td:nth-child(4) {
+  width: 30%;
+}
+
+.users-table th:nth-child(5), .users-table td:nth-child(5) {
+  width: 20%;
+}
+
+/* Remove the 6th column width setting since we no longer have 6 columns */
+.users-table th:nth-child(6), .users-table td:nth-child(6) {
+  width: 15%;
+}
+
+/* Make action buttons more compact */
+.actions-cell {
+  display: flex;
+  gap: 0.25rem;
+  min-width: 80px;
+}
+
+.btn-action {
+  width: 32px;
+  height: 32px;
+  margin: 0 2px;
+}
+
+/* Fix gold tab styling */
+.user-online {
+  background-color: rgba(255, 223, 0, 0.1);
+  border-left: 3px solid #ffd700;
+}
+
+/* Ensure password container doesn't overflow */
+.password-container {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  max-width: 100%;
+}
+
+/* Make password text truncate if needed */
+.password-container span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 120px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .users-table-container {
+    overflow-x: auto;
+  }
+  
+  .users-table {
+    min-width: 800px;
+  }
+}
 .btn-action:nth-child(2) {
-  color: #ff3b30;
-  border-color: #ff3b30;
-}
-
-.btn-action:nth-child(2):hover {
-  background: #ff3b30;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(255, 59, 48, 0.3);
-}.btn-action:nth-child(2) {
   color: #e74c3c;
   border-color: #e74c3c;
 }

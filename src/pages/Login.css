@@ -180,3 +180,32 @@
     padding: 1.5rem;
   }
 }
+
+/* Add this at the end of the file */
+.register-link {
+  margin-top: 15px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+.register-link a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.register-link a:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+.success-message {
+  color: #28a745;
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: rgba(40, 167, 69, 0.1);
+  border-radius: 4px;
+  border-left: 4px solid #28a745;
+}

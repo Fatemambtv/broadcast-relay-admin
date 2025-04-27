@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import "./App.css";
 import { clearAuthData, getAuthData, setAuthData } from "./util/auth";
 import Login from "./pages/Login";
+import Register from "./pages/Register"; // Import the new Register component
 import Dashboard from "./pages/Dashboard";
 import UserManagement from "./pages/UserManagement";
 import ServerControl from "./pages/ServerControl";
@@ -83,6 +84,10 @@ function App() {
             <Route 
               path="/login" 
               element={isLoggedIn ? <Navigate to="/dashboard" /> : <Login onLogin={handleLogin} />} 
+            />
+            <Route 
+              path="/register" 
+              element={isLoggedIn ? <Navigate to="/dashboard" /> : <Register />} 
             />
             <Route 
               path="/dashboard" 

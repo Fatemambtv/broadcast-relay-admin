@@ -3,6 +3,7 @@ import { User, Lock } from 'lucide-react';
 import { doc, getDoc } from "firebase/firestore";
 import { ref, set } from "firebase/database";
 import { db, Realtimedb } from "../util/firebase";
+import { Link } from 'react-router-dom'; // Add this import
 import LoadingSpinner from '../components/LoadingSpinner';
 import './Login.css';
 
@@ -116,6 +117,11 @@ const Login = ({ onLogin }) => {
           >
             {loading ? <LoadingSpinner size="small" color="white" text="" /> : 'Login'}
           </button>
+          
+          {/* Add registration link */}
+          <div className="register-link">
+            New admin? <Link to="/register">Register here</Link>
+          </div>
         </form>
         
         <div className="login-footer">
