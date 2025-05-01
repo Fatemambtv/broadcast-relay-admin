@@ -5,7 +5,7 @@ import { ref, set } from "firebase/database";
 import { db, Realtimedb } from "../util/firebase";
 import { Link } from 'react-router-dom'; // Add this import
 import LoadingSpinner from '../components/LoadingSpinner';
-import './Login.css';
+import '../styles/Login.css';
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('');

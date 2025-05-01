@@ -7,7 +7,7 @@ import { doc, setDoc, collection, getDocs, deleteDoc } from "firebase/firestore"
 import { ref, set, onValue, get } from "firebase/database";
 import { db, Realtimedb } from "../util/firebase";
 import LoadingSpinner from '../components/LoadingSpinner';
-import './UserManagement.css';
+import '../styles/UserManagement.css';
 
 const UserManagement = () => {
   const [its, setITS] = useState('');

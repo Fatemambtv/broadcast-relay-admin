@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { doc, setDoc, collection, getDocs, deleteDoc } from "firebase/firestore";
 import { ref, set, onValue } from "firebase/database";
 import { db, Realtimedb } from "./util/firebase";
-import './AuthComponent.css';
+import './styles/AuthComponent.css';
 import { AdminControls } from './AdminControls';
 
 const AuthComponent = ({ isLoggedIn, onLogout }) => {

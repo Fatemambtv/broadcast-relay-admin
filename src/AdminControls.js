@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {onValue, ref, set} from "firebase/database";
 import {Realtimedb} from "./util/firebase";
-import './AdminControls.css';
+import './styles/AdminControls.css';
 
 export function AdminControls() {
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ref, onValue, set, off } from "firebase/database";  // Added 'off' import
 import { Realtimedb } from "../util/firebase";
 import LoadingSpinner from '../components/LoadingSpinner';
-import './ServerControl.css';
+import '../styles/ServerControl.css';
 
 const ServerControl = () => {
   const [loading, setLoading] = useState(true);

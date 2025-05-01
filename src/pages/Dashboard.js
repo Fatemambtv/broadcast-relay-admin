@@ -3,7 +3,7 @@ import { ref, onValue } from "firebase/database";
 import { collection, getDocs } from "firebase/firestore";
 import { Realtimedb, db } from "../util/firebase";
 import LoadingSpinner from '../components/LoadingSpinner';
-import './Dashboard.css';
+import '../styles/Dashboard.css';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({

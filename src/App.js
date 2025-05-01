@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import "./App.css";
+import './styles/App.css';
 import { clearAuthData, getAuthData, setAuthData } from "./util/auth";
 import Login from "./pages/Login";
 import Register from "./pages/Register"; // Import the new Register component

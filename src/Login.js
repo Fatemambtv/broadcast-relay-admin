@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { onValue, ref, set } from "firebase/database";
 import { doc, getDoc } from "firebase/firestore";
-import "./Login.css";
+import './styles/Login.css';
 import { db, Realtimedb } from "./util/firebase";
 
 function Login({ onLogin }) {
