@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Lock } from 'lucide-react';
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { ref, set } from "firebase/database";
+import { ref, set, onValue } from "firebase/database";
 import { auth, db, Realtimedb } from "../util/firebase";
 import { Link } from 'react-router-dom';
 import LoadingSpinner from '../components/LoadingSpinner';
-import '../styles/Login.css';
+import '../styles/Login.css';  // Updated to use the styles directory version
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('');
@@ -14,12 +14,34 @@ const Login = ({ onLogin }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isAlreadyLoggedIn, setIsAlreadyLoggedIn] = useState(false);
+
+  // Check if user is already logged in elsewhere
+  useEffect(() => {
+    if (username) {
+      const loggedInUserRef = ref(Realtimedb, `loggedInUsers/${username}`);
+      onValue(loggedInUserRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data && data.login_status) {
+          setIsAlreadyLoggedIn(true);
+        } else {
+          setIsAlreadyLoggedIn(false);
+        }
+      });
+    }
+  }, [username]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     
     if (!username || !password) {
       setError('Please enter both username and password');
+      return;
+    }
+    
+    // Check if user is already logged in elsewhere
+    if (isAlreadyLoggedIn) {
+      setError('Only 1 login allowed per user. Please logout from other device and refresh.');
       return;
     }
     
