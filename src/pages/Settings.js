@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { ref, onValue } from "firebase/database";
-import { Realtimedb } from "../util/firebase";
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import { auth } from "../util/firebase";
 import { getAuthData } from "../util/auth";
@@ -8,7 +6,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import '../styles/Settings.css';
 
 const Settings = () => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -17,23 +15,7 @@ const Settings = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
-  useEffect(() => {
-    const fetchAdminData = async () => {
-      try {
-        setLoading(true);
-        // This is just to check if we can connect to the database
-        const adminRef = ref(Realtimedb, 'loggedInUsers/admin');
-        onValue(adminRef, (snapshot) => {
-          setLoading(false);
-        });
-      } catch (error) {
-        console.error("Error fetching admin data:", error);
-        setLoading(false);
-      }
-    };
-
-    fetchAdminData();
-  }, []);
+  // Remove the useEffect that fetches admin data from Realtime Database
 
   const showMessage = (msg) => {
     setMessage(msg);
@@ -84,17 +66,21 @@ const Settings = () => {
       setNewPassword('');
       setConfirmPassword('');
       
-      setLoading(false);
     } catch (error) {
       console.error("Error changing password:", error);
-      showMessage('Error changing password: ' + error.message);
+      
+      // Provide more specific error messages
+      if (error.code === 'auth/wrong-password') {
+        showMessage('Current password is incorrect.');
+      } else if (error.code === 'auth/requires-recent-login') {
+        showMessage('For security reasons, please log out and log back in before changing your password.');
+      } else {
+        showMessage('Error changing password: ' + error.message);
+      }
+    } finally {
       setLoading(false);
     }
   };
-
-  if (loading) {
-    return <LoadingSpinner size="large" text="Loading settings..." />;
-  }
 
   return (
     <div className="settings-container">

@@ -21,8 +21,9 @@ const Dashboard = () => {
         // Fetch all registered users from Firestore
         const usersCollection = collection(db, "users");
         const usersSnapshot = await getDocs(usersCollection);
+        // Update the user count calculation to filter by role
         const totalRegisteredUsers = usersSnapshot.docs
-          .filter(doc => doc.id !== 'admin') // Exclude admin user
+          .filter(doc => doc.data().role !== 'admin')
           .length;
         
         // Fetch online users data from Realtime DB

@@ -179,51 +179,38 @@
   transform: rotate(180deg);
 }
 
+/* Responsive table container */
 .users-table-container {
+  width: 100%;
   overflow-x: auto;
 }
 
-/* Add this CSS to fix the actions column alignment */
+/* Table styling */
 .users-table {
   width: 100%;
-  table-layout: fixed;
+  table-layout: auto;
+  border-collapse: collapse;
 }
 
 .users-table th, .users-table td {
-  padding: 0.75rem;
+  padding: 0.5rem 0.75rem;
   text-align: left;
   vertical-align: middle;
+  min-width: 80px;
 }
 
-/* Set specific widths for each column */
-.users-table th:nth-child(1), .users-table td:nth-child(1) {
-  width: 10%;
-}
+/* Column widths */
+.users-table th:nth-child(1), .users-table td:nth-child(1) { width: 5%; }
+.users-table th:nth-child(2), .users-table td:nth-child(2) { width: 30%; }
+.users-table th:nth-child(3), .users-table td:nth-child(3) { width: 20%; }
+.users-table th:nth-child(4), .users-table td:nth-child(4) { width: 25%; }
+.users-table th:nth-child(5), .users-table td:nth-child(5) { width: 20%; }
 
-.users-table th:nth-child(2), .users-table td:nth-child(2) {
-  width: 25%;
-}
-
-.users-table th:nth-child(3), .users-table td:nth-child(3) {
-  width: 20%;
-}
-
-.users-table th:nth-child(4), .users-table td:nth-child(4) {
-  width: 25%;
-}
-
-.users-table th:nth-child(5), .users-table td:nth-child(5) {
-  width: 20%;
-}
-
-.actions-cell {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-start;
-  align-items: center;
-  flex-wrap: nowrap;
-  min-width: 90px;
-  width: 100%;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .users-table {
+    min-width: 600px;
+  }
 }
 
 /* Consolidated button styles */
@@ -232,44 +219,60 @@
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 0;
-  margin: 0 4px;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   color: #555;
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.btn-action:nth-child(1) {
+.btn-action.sign-out {
   color: #3498db;
   border-color: #3498db;
 }
 
-.btn-action:nth-child(1):hover {
+.btn-action.sign-out:hover {
   background: #3498db;
   color: white;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
 }
 
-.btn-action:nth-child(2) {
-  color: #ff3b30;
-  border-color: #ff3b30;
+.btn-action.delete {
+  color: #e74c3c;
+  border-color: #e74c3c;
 }
 
-.btn-action:nth-child(2):hover {
-  background: #ff3b30;
+.btn-action.delete:hover {
+  background: #e74c3c;
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(255, 59, 48, 0.3);
+  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
 }
 
-/* Remove duplicate .btn-action definitions that appear later in the file */
+.btn-action.change-password {
+  color: #8e44ad;
+  border-color: #8e44ad;
+}
+
+.btn-action.change-password:hover {
+  background: #8e44ad;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(142, 68, 173, 0.3);
+}
+
+/* Actions cell styling */
+.actions-cell {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
 .btn-warning, .btn-danger {
   border: none;
   border-radius: 8px;
@@ -283,16 +286,21 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.btn-warning {
-  background-color: #f39c12;
-  color: white;
-}
+/* Remove empty ruleset */
+  /* This class isn't used in your component */
+/* Remove empty ruleset */
 
 .btn-danger {
   background-color: #e74c3c;
   color: white;
 }
+  /* This class isn't used in your component */
+.btn-danger {
+  background-color: #e74c3c;
+  color: white;
+}
 
+/* Also remove any duplicate .btn-action definitions */
 .btn-warning:hover {
   background-color: #e67e22;
   transform: translateY(-2px);
@@ -535,6 +543,50 @@
   .users-table {
     min-width: 800px;
   }
+}
+.btn-action:nth-child(2) {
+  color: #e74c3c;
+  border-color: #e74c3c;
+}
+
+.btn-action:nth-child(2):hover {
+  background: #e74c3c;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+}
+
+/* Pagination styles */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+  gap: 1rem;
+}
+
+.pagination-btn {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #f5f5f5;
+  transform: translateY(-2px);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  font-size: 0.9rem;
+  color: #555;
 }
 .btn-action:nth-child(2) {
   color: #e74c3c;
