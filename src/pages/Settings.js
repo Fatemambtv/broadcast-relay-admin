@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ref, onValue, set } from "firebase/database";
+import { ref, onValue } from "firebase/database";
 import { Realtimedb } from "../util/firebase";
+import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
+import { auth } from "../util/firebase";
+import { getAuthData } from "../util/auth";
 import LoadingSpinner from '../components/LoadingSpinner';
 import '../styles/Settings.css';
 
@@ -12,7 +15,7 @@ const Settings = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Add this line
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   useEffect(() => {
     const fetchAdminData = async () => {
@@ -58,29 +61,33 @@ const Settings = () => {
     try {
       setLoading(true);
       
-      // First verify the current password
-      const adminRef = ref(Realtimedb, 'users/admin');
-      onValue(adminRef, async (snapshot) => {
-        const adminData = snapshot.val();
-        
-        if (adminData && adminData.password === adminPassword) {
-          // Password is correct, update it
-          await set(ref(Realtimedb, 'users/admin/password'), newPassword);
-          showMessage('Password updated successfully!');
-          setAdminPassword('');
-          setNewPassword('');
-          setConfirmPassword('');
-        } else {
-          showMessage('Current password is incorrect.');
-        }
-        
+      const user = auth.currentUser;
+      if (!user) {
+        showMessage('You must be logged in to change your password.');
         setLoading(false);
-      }, {
-        onlyOnce: true
-      });
+        return;
+      }
+      
+      // Get the email from the current user
+      const authData = getAuthData();
+      const email = `${authData.username}@broadcastrelay.com`;
+      
+      // Re-authenticate the user
+      const credential = EmailAuthProvider.credential(email, adminPassword);
+      await reauthenticateWithCredential(user, credential);
+      
+      // Update the password
+      await updatePassword(user, newPassword);
+      
+      showMessage('Password updated successfully!');
+      setAdminPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      
+      setLoading(false);
     } catch (error) {
       console.error("Error changing password:", error);
-      showMessage('Error changing password.');
+      showMessage('Error changing password: ' + error.message);
       setLoading(false);
     }
   };

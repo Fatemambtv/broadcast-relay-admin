@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { User, Lock } from 'lucide-react';
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { ref, set } from "firebase/database";
-import { db, Realtimedb } from "../util/firebase";
-import { Link } from 'react-router-dom'; // Add this import
+import { auth, db, Realtimedb } from "../util/firebase";
+import { Link } from 'react-router-dom';
 import LoadingSpinner from '../components/LoadingSpinner';
 import '../styles/Login.css';
 
@@ -26,29 +27,36 @@ const Login = ({ onLogin }) => {
       setLoading(true);
       setError('');
       
-      // Check if the user exists in Firestore
-      const userRef = doc(db, "users", username);
+      // Sign in with Firebase Authentication
+      const userCredential = await signInWithEmailAndPassword(
+        auth, 
+        `${username}@broadcastrelay.com`, 
+        password
+      );
+      
+      // Get additional user data from Firestore
+      const userRef = doc(db, "users", userCredential.user.uid);
       const userSnap = await getDoc(userRef);
       
       if (userSnap.exists()) {
         const userData = userSnap.data();
         
-        // Check if password matches
-        if (userData.password === password) {
-          // Update login status in Realtime Database
-          await set(ref(Realtimedb, `loggedInUsers/${username}`), {
-            login_status: true,
-            last_login: new Date().toISOString(),
-            last_activity: new Date().toISOString() // Add last activity timestamp
-          });
-          
-          // Call the onLogin callback with user data
-          onLogin({ username, name: userData.name });
-        } else {
-          setError('Invalid password');
-        }
+        // Update login status in Realtime Database
+        await set(ref(Realtimedb, `loggedInUsers/${username}`), {
+          login_status: true,
+          last_login: new Date().toISOString(),
+          last_activity: new Date().toISOString(),
+          name: userData.name
+        });
+        
+        // Call the onLogin callback with user data
+        onLogin({ 
+          username, 
+          name: userData.name,
+          uid: userCredential.user.uid
+        });
       } else {
-        setError('User not found');
+        setError('User data not found');
       }
     } catch (error) {
       setError('Login failed: ' + error.message);

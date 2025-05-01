@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { User, Lock, UserPlus, Mail } from 'lucide-react';
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { ref, set } from "firebase/database";
-import { db, Realtimedb } from "../util/firebase";
+import React, { useState } from 'react';
+import { User, Lock, UserPlus } from 'lucide-react';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "../util/firebase";
 import { Link, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../components/LoadingSpinner';
 import './Login.css'; // Reuse login styles
@@ -36,22 +36,22 @@ const Register = () => {
       setLoading(true);
       setError('');
       
-      // Check if the admin already exists
-      const adminRef = doc(db, "users", username);
-      const adminSnap = await getDoc(adminRef);
+      // Create user with Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(
+        auth, 
+        `${username}@broadcastrelay.com`, 
+        password
+      );
       
-      if (adminSnap.exists()) {
-        setError('Admin with this username already exists. Please login instead.');
-        setTimeout(() => {
-          navigate('/login');
-        }, 3000);
-        return;
-      }
+      // Update profile with display name
+      await updateProfile(userCredential.user, { 
+        displayName: name 
+      });
       
-      // Create new admin in Firestore
-      await setDoc(doc(db, "users", username), {
-        name: name,
-        password: password,
+      // Store additional user data in Firestore
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+        name,
+        username,
         role: 'admin',
         created_at: new Date().toISOString()
       });
