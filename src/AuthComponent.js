@@ -4,7 +4,7 @@ import { doc, setDoc, collection, getDocs, deleteDoc } from "firebase/firestore"
 import { ref, set, onValue } from "firebase/database";
 import { db, Realtimedb } from "./util/firebase";
 import './styles/AuthComponent.css';
-import { AdminControls } from './AdminControls';
+// Remove AdminControls import
 
 const AuthComponent = ({ isLoggedIn, onLogout }) => {
   const [its, setITS] = useState('');
@@ -143,7 +143,7 @@ const AuthComponent = ({ isLoggedIn, onLogout }) => {
           </h1>
           <button className='registerBtn' onClick={handleAdminSignout}>Logout</button>
         </div>
-        <AdminControls />
+        {/* Remove AdminControls component */}
         
         {/* Rest of the component remains the same */}
         <div className='admin-controls'>
