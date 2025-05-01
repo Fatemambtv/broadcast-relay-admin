@@ -171,7 +171,12 @@ const UserManagement = () => {
     if (window.confirm(`Are you sure you want to delete user ${uid}?`)) {
       try {
         setLoading(true);
+        // Delete from Firestore
         await deleteDoc(doc(db, "users", uid));
+        
+        // Also delete from Realtime Database
+        await set(ref(Realtimedb, `loggedInUsers/${uid}`), null);
+        
         setSuccess("User deleted successfully!");
         setError(null);
         fetchUsers();
