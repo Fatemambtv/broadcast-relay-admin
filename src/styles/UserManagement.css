@@ -467,6 +467,15 @@
   width: 300px;
 }
 
+.search-container input {
+  padding: 0.75rem;
+  border: 2px solid #d0e1fd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  width: 80%;
+}
+
 /* Make table more compact */
 .users-table th, .users-table td {
   padding: 0.5rem 0.75rem;
@@ -518,6 +527,12 @@
   border-left: 3px solid #ffd700;
 }
 
+.password-field {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
 /* Ensure password container doesn't overflow */
 .password-container {
   display: flex;
@@ -532,6 +547,19 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 120px;
+}
+
+.generate-btn {
+  background-color: #8e44ad;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-left: 0.5rem;
 }
 
 /* Responsive adjustments */

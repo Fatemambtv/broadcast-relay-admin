@@ -10,7 +10,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import '../styles/UserManagement.css';
 
 const UserManagement = () => {
-  const [its, setITS] = useState('');
+  const [UserID, setUserID] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [users, setUsers] = useState([]);
@@ -106,8 +106,8 @@ const UserManagement = () => {
   }, []);
 
   // Replace the existing generatePassword function with this one
-  const generatePassword = (name, its) => {
-    if (name && name.length > 0 && its && its.length > 0) {
+  const generatePassword = (name, UserID) => {
+    if (name && name.length > 0 && UserID && UserID.length > 0) {
     // Create a more secure random password
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$';
     let randomPassword = '';
@@ -115,9 +115,9 @@ const UserManagement = () => {
     // Start with first letter of name (lowercase)
     randomPassword += name.charAt(0).toLowerCase();
     
-    // Add last 4 digits of PRN if available
-    if (its.length >= 4) {
-      randomPassword += its.slice(-4);
+    // Add last 4 digUserID of PRN if available
+    if (UserID.length >= 4) {
+      randomPassword += UserID.slice(-4);
     }
     
     // Add random characters to make password at least 8 characters long
@@ -140,8 +140,8 @@ const UserManagement = () => {
     user.id.includes(searchTerm)
   );
 
-  const handleSignUp = async (its, password, name) => {
-    if (!its || !name || !password) {
+  const handleSignUp = async (UserID, password, name) => {
+    if (!UserID || !name || !password) {
       setError("Please fill all the fields.");
       setSuccess(null);
       return;
@@ -149,13 +149,13 @@ const UserManagement = () => {
     
     try {
       setLoading(true);
-      await setDoc(doc(db, "users", its), {
+      await setDoc(doc(db, "users", UserID), {
         name: name,
         password: password
       });
       setSuccess("User created successfully!");
       setError(null);
-      setITS('');
+      setUserID('');
       setName('');
       setPassword('');
       fetchUsers();
@@ -189,11 +189,11 @@ const UserManagement = () => {
     }
   };
 
-  const handleSignOut = async (its) => {
+  const handleSignOut = async (UserID) => {
     try {
       setLoading(true);
-      await set(ref(Realtimedb, `/loggedInUsers/${its}/login_status`), false);
-      setSuccess(`User ${its} signed out successfully!`);
+      await set(ref(Realtimedb, `/loggedInUsers/${UserID}/login_status`), false);
+      setSuccess(`User ${UserID} signed out successfully!`);
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -233,19 +233,19 @@ const UserManagement = () => {
   const handleNameChange = (e) => {
     const newName = e.target.value;
     setName(newName);
-    generatePassword(newName, its);
+    generatePassword(newName, UserID);
   };
 
-  const handleITSChange = (e) => {
-    const newITS = e.target.value;
-    setITS(newITS);
-    generatePassword(name, newITS);
+  const handleUserIDChange = (e) => {
+    const newUserID = e.target.value;
+    setUserID(newUserID);
+    generatePassword(name, newUserID);
   };
 
-  const handleTogglePassword = (its) => {
+  const handleTogglePassword = (UserID) => {
     setUsers(prevUsers => {
       return prevUsers.map(user => {
-        if (user.id === its) {
+        if (user.id === UserID) {
           return { ...user, showPassword: !user.showPassword };
         }
         return user;
@@ -277,13 +277,13 @@ const UserManagement = () => {
           </div>
           
           <div className="form-group">
-            <label htmlFor="its">User ID</label>
+            <label htmlFor="UserID">UserID</label>
             <input
               type="text"
-              id="its"
+              id="UserID"
               placeholder="Enter user ID"
-              value={its}
-              onChange={handleITSChange}
+              value={UserID}
+              onChange={handleUserIDChange}
               maxLength={8}
             />
           </div>
@@ -296,12 +296,13 @@ const UserManagement = () => {
                 id="password"
                 placeholder="Password will be generated"
                 value={password}
+                className='password-input'
                 onChange={(e) => setPassword(e.target.value)}
                 readOnly={false}
               />
               <button 
                 className="generate-btn"
-                onClick={() => generatePassword(name, its)}
+                onClick={() => generatePassword(name, UserID)}
                 title="Generate Password"
               >
                 <i className="fas fa-sync-alt"></i>
@@ -311,7 +312,7 @@ const UserManagement = () => {
           
           <button 
             className="btn-primary"
-            onClick={() => handleSignUp(its, password, name)}
+            onClick={() => handleSignUp(UserID, password, name)}
             disabled={loading}
           >
             {loading ? <LoadingSpinner size="small" color="white" text="" /> : 'Add User'}
@@ -357,7 +358,7 @@ const UserManagement = () => {
                     <tr>
                       <th>Status</th>
                       <th>Name</th>
-                      <th>User ID</th>
+                      <th>UserID</th>
                       <th>Password</th>
                       <th>Actions</th>
                     </tr>

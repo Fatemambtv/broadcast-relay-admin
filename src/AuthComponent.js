@@ -7,7 +7,7 @@ import './styles/AuthComponent.css';
 // Remove AdminControls import
 
 const AuthComponent = ({ isLoggedIn, onLogout }) => {
-  const [its, setITS] = useState('');
+  const [UserID, setUserID] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [users, setUsers] = useState([]);
@@ -54,11 +54,11 @@ const AuthComponent = ({ isLoggedIn, onLogout }) => {
     fetchUsers();
   }, []);
 
-  const generatePassword = (name, its) => {
+  const generatePassword = (name, UserID) => {
     if (name && name.length > 0) {
-      setPassword(name.charAt(0).toLowerCase() + its.slice(-4));
+      setPassword(name.charAt(0).toLowerCase() + UserID.slice(-4));
     } else {
-      setPassword(its.slice(-4));
+      setPassword(UserID.slice(-4));
       return;
     }
   }
@@ -72,13 +72,13 @@ const AuthComponent = ({ isLoggedIn, onLogout }) => {
     user.id.includes(searchTerm)
   );
 
-  const handleSignUp = async (its, password, name) => {
-    if (!its || !name) {
+  const handleSignUp = async (UserID, password, name) => {
+    if (!UserID || !name) {
       setError("Please fill all the fields.");
       return;
     }
     try {
-      await setDoc(doc(db, "users", its), {
+      await setDoc(doc(db, "users", UserID), {
         name: name,
         password: password
       });
@@ -99,26 +99,26 @@ const AuthComponent = ({ isLoggedIn, onLogout }) => {
     }
   };
 
-  const handleSignOut = async (its) => {
-    await set(ref(Realtimedb, `/loggedInUsers/${its}/login_status`), false);
+  const handleSignOut = async (UserID) => {
+    await set(ref(Realtimedb, `/loggedInUsers/${UserID}/login_status`), false);
   }
 
   const handleNameChange = (e) => {
     const newName = e.target.value;
     setName(newName);
-    generatePassword(newName, its);
+    generatePassword(newName, UserID);
   };
 
-  const handleITSChange = (e) => {
-    const newITS = e.target.value;
-    setITS(newITS);
-    generatePassword(name, newITS);
+  const handleUserIDChange = (e) => {
+    const newUserID = e.target.value;
+    setUserID(newUserID);
+    generatePassword(name, newUserID);
   };
 
-  const handleTogglePassword = (its) => {
+  const handleTogglePassword = (UserID) => {
     setUsers(prevUsers => {
       return prevUsers.map(user => {
-        if (user.id === its) {
+        if (user.id === UserID) {
           return { ...user, showPassword: !user.showPassword };
         }
         return user;
@@ -156,15 +156,15 @@ const AuthComponent = ({ isLoggedIn, onLogout }) => {
             />
             <input
               type="text"
-              placeholder="User ID"
-              value={its}
+              placeholder="UserID"
+              value={UserID}
               maxLength={8}
-              onChange={handleITSChange}
+              onChange={handleUserIDChange}
             />
   
             <p>Password: {password}</p>
   
-            <button className='registerBtn' onClick={() => handleSignUp(its, password, name)}>Register</button>
+            <button className='registerBtn' onClick={() => handleSignUp(UserID, password, name)}>Register</button>
             {error && <p className="error-message">{error}</p>}
           </div>
           
@@ -175,7 +175,7 @@ const AuthComponent = ({ isLoggedIn, onLogout }) => {
           <input
             className='search-bar'
             type="text"
-            placeholder="Search by Name or User ID"
+            placeholder="Search by Name or UserID"
             value={searchTerm}
             onChange={handleSearch}
           />
