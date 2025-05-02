@@ -3,7 +3,7 @@ import { HiOutlineRefresh } from 'react-icons/hi';
 import { CgLogOut } from 'react-icons/cg';
 import { RiDeleteBinLine } from 'react-icons/ri';
 import { IoEyeOutline, IoEyeOffOutline } from 'react-icons/io5';
-import { doc, setDoc, collection, getDocs, deleteDoc } from "firebase/firestore";
+import { doc, setDoc, collection, getDocs, deleteDoc, getDoc } from "firebase/firestore";
 import { ref, set, onValue, get } from "firebase/database";
 import { db, Realtimedb, auth } from "../util/firebase";
 import { createUserWithEmailAndPassword, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser } from 'firebase/auth';
