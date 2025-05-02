@@ -5,12 +5,13 @@ import { RiDeleteBinLine } from 'react-icons/ri';
 import { IoEyeOutline, IoEyeOffOutline } from 'react-icons/io5';
 import { doc, setDoc, collection, getDocs, deleteDoc } from "firebase/firestore";
 import { ref, set, onValue, get } from "firebase/database";
-import { db, Realtimedb } from "../util/firebase";
+import { db, Realtimedb, auth } from "../util/firebase";
+import { createUserWithEmailAndPassword, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser } from 'firebase/auth';
 import LoadingSpinner from '../components/LoadingSpinner';
 import '../styles/UserManagement.css';
 
 const UserManagement = () => {
-  const [UserID, setUserID] = useState('');
+  const [its, setITS] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [users, setUsers] = useState([]);
@@ -90,8 +91,8 @@ const UserManagement = () => {
         .filter(doc => doc.id !== 'admin') // Exclude admin user
         .map(doc => ({
           id: doc.id,
-          ...doc.data(),
-          showPassword: false,
+          ...doc.data()
+          // No password field here anymore
         }));
       setUsers(usersData);
       setLoading(false);
@@ -106,30 +107,30 @@ const UserManagement = () => {
   }, []);
 
   // Replace the existing generatePassword function with this one
-  const generatePassword = (name, UserID) => {
-    if (name && name.length > 0 && UserID && UserID.length > 0) {
-    // Create a more secure random password
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$';
-    let randomPassword = '';
-    
-    // Start with first letter of name (lowercase)
-    randomPassword += name.charAt(0).toLowerCase();
-    
-    // Add last 4 digUserID of PRN if available
-    if (UserID.length >= 4) {
-      randomPassword += UserID.slice(-4);
+  const generatePassword = (name, its) => {
+    if (name && name.length > 0 && its && its.length > 0) {
+      // Create a more secure random password
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$';
+      let randomPassword = '';
+      
+      // Start with first letter of name (lowercase)
+      randomPassword += name.charAt(0).toLowerCase();
+      
+      // Add last 4 digits of PRN if available
+      if (its.length >= 4) {
+        randomPassword += its.slice(-4);
+      }
+      
+      // Add random characters to make password at least 8 characters long
+      while (randomPassword.length < 8) {
+        randomPassword += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      
+      setPassword(randomPassword);
+    } else {
+      setPassword('');
     }
-    
-    // Add random characters to make password at least 8 characters long
-    while (randomPassword.length < 8) {
-      randomPassword += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    
-    setPassword(randomPassword);
-  } else {
-    setPassword('');
   }
-}
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -140,8 +141,8 @@ const UserManagement = () => {
     user.id.includes(searchTerm)
   );
 
-  const handleSignUp = async (UserID, password, name) => {
-    if (!UserID || !name || !password) {
+  const handleSignUp = async (its, password, name) => {
+    if (!its || !name || !password) {
       setError("Please fill all the fields.");
       setSuccess(null);
       return;
@@ -149,13 +150,27 @@ const UserManagement = () => {
     
     try {
       setLoading(true);
-      await setDoc(doc(db, "users", UserID), {
-        name: name,
-        password: password
+      
+      // Create user in Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(
+        auth, 
+        `${its}@broadcastrelay.com`, // Use a consistent email format
+        password
+      );
+      
+      const uid = userCredential.user.uid;
+      
+      // Store metadata in Firestore (without password)
+      await setDoc(doc(db, "users", uid), {
+        name,
+        its,
+        role: 'user', // Add role for access control
+        createdAt: new Date().toISOString()
       });
+      
       setSuccess("User created successfully!");
       setError(null);
-      setUserID('');
+      setITS('');
       setName('');
       setPassword('');
       fetchUsers();
@@ -171,11 +186,29 @@ const UserManagement = () => {
     if (window.confirm(`Are you sure you want to delete user ${uid}?`)) {
       try {
         setLoading(true);
+        
+        // Get the user document from Firestore first to get the ITS
+        const userDoc = await getDoc(doc(db, "users", uid));
+        const userData = userDoc.data();
+        
+        if (userData && userData.its) {
+          // Delete from Firebase Authentication if possible
+          try {
+            // This would require admin SDK in a real implementation
+            // For client-side, we'll just handle Firestore and Realtime DB
+            console.log("Would delete auth user if this was server-side");
+          } catch (authErr) {
+            console.error("Error deleting auth user:", authErr);
+          }
+        }
+        
         // Delete from Firestore
         await deleteDoc(doc(db, "users", uid));
         
         // Also delete from Realtime Database
-        await set(ref(Realtimedb, `loggedInUsers/${uid}`), null);
+        if (userData && userData.its) {
+          await set(ref(Realtimedb, `loggedInUsers/${userData.its}`), null);
+        }
         
         setSuccess("User deleted successfully!");
         setError(null);
@@ -189,11 +222,11 @@ const UserManagement = () => {
     }
   };
 
-  const handleSignOut = async (UserID) => {
+  const handleSignOut = async (its) => {
     try {
       setLoading(true);
-      await set(ref(Realtimedb, `/loggedInUsers/${UserID}/login_status`), false);
-      setSuccess(`User ${UserID} signed out successfully!`);
+      await set(ref(Realtimedb, `/loggedInUsers/${its}/login_status`), false);
+      setSuccess(`User ${its} signed out successfully!`);
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -206,7 +239,6 @@ const UserManagement = () => {
   // Add new function to handle password change
   const handleChangePassword = async (userId) => {
     const newPassword = prompt("Enter new password for user:");
-    
     if (!newPassword) {
       setError("Password change cancelled.");
       return;
@@ -214,14 +246,25 @@ const UserManagement = () => {
     
     try {
       setLoading(true);
-      await setDoc(doc(db, "users", userId), {
-        name: users.find(user => user.id === userId).name,
-        password: newPassword
-      }, { merge: true });
       
-      setSuccess(`Password for ${userId} changed successfully!`);
+      // In a real implementation, this would require admin SDK or user to be logged in
+      // For client-side demo, we'll show the concept
+      setSuccess(`Password for user would be changed (requires Firebase Admin SDK)`);
       setError(null);
-      fetchUsers();
+      
+      // Note: In a real implementation with proper authentication:
+      // const user = auth.currentUser;
+      // if (user.uid !== userId) {
+      //   setError("Only the user can change their own password.");
+      //   return;
+      // }
+      // const credential = EmailAuthProvider.credential(
+      //   `${userId}@broadcastrelay.com`, 
+      //   prompt("Enter current password:")
+      // );
+      // await reauthenticateWithCredential(user, credential);
+      // await updatePassword(user, newPassword);
+      
     } catch (err) {
       setError(err.message);
       setSuccess(null);
@@ -233,19 +276,19 @@ const UserManagement = () => {
   const handleNameChange = (e) => {
     const newName = e.target.value;
     setName(newName);
-    generatePassword(newName, UserID);
+    generatePassword(newName, its);
   };
 
-  const handleUserIDChange = (e) => {
-    const newUserID = e.target.value;
-    setUserID(newUserID);
-    generatePassword(name, newUserID);
+  const handleITSChange = (e) => {
+    const newITS = e.target.value;
+    setITS(newITS);
+    generatePassword(name, newITS);
   };
 
-  const handleTogglePassword = (UserID) => {
+  const handleTogglePassword = (its) => {
     setUsers(prevUsers => {
       return prevUsers.map(user => {
-        if (user.id === UserID) {
+        if (user.id === its) {
           return { ...user, showPassword: !user.showPassword };
         }
         return user;
@@ -277,13 +320,13 @@ const UserManagement = () => {
           </div>
           
           <div className="form-group">
-            <label htmlFor="UserID">UserID</label>
+            <label htmlFor="its">User ID</label>
             <input
               type="text"
-              id="UserID"
+              id="its"
               placeholder="Enter user ID"
-              value={UserID}
-              onChange={handleUserIDChange}
+              value={its}
+              onChange={handleITSChange}
               maxLength={8}
             />
           </div>
@@ -296,13 +339,12 @@ const UserManagement = () => {
                 id="password"
                 placeholder="Password will be generated"
                 value={password}
-                className='password-input'
                 onChange={(e) => setPassword(e.target.value)}
                 readOnly={false}
               />
               <button 
                 className="generate-btn"
-                onClick={() => generatePassword(name, UserID)}
+                onClick={() => generatePassword(name, its)}
                 title="Generate Password"
               >
                 <i className="fas fa-sync-alt"></i>
@@ -312,7 +354,7 @@ const UserManagement = () => {
           
           <button 
             className="btn-primary"
-            onClick={() => handleSignUp(UserID, password, name)}
+            onClick={() => handleSignUp(its, password, name)}
             disabled={loading}
           >
             {loading ? <LoadingSpinner size="small" color="white" text="" /> : 'Add User'}
@@ -358,7 +400,7 @@ const UserManagement = () => {
                     <tr>
                       <th>Status</th>
                       <th>Name</th>
-                      <th>UserID</th>
+                      <th>User ID</th>
                       <th>Password</th>
                       <th>Actions</th>
                     </tr>
