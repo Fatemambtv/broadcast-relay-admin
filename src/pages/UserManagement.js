@@ -88,11 +88,10 @@ const UserManagement = () => {
       const usersCollection = collection(db, "users");
       const usersSnapshot = await getDocs(usersCollection);
       const usersData = usersSnapshot.docs
-        .filter(doc => doc.id !== 'admin') // Exclude admin user
+        .filter(doc => !doc.data().isAdmin) // Exclude admin users using the flag
         .map(doc => ({
           id: doc.id,
           ...doc.data()
-          // No password field here anymore
         }));
       setUsers(usersData);
       setLoading(false);
@@ -154,18 +153,20 @@ const UserManagement = () => {
       // Create user in Firebase Authentication
       const userCredential = await createUserWithEmailAndPassword(
         auth, 
-        `${its}@broadcastrelay.com`, // Use a consistent email format
+        `${its}@broadcastrelay.com`,
         password
       );
       
       const uid = userCredential.user.uid;
       
-      // Store metadata in Firestore (without password)
+      // Store metadata in Firestore with clear role separation
       await setDoc(doc(db, "users", uid), {
         name,
         its,
-        role: 'user', // Add role for access control
-        createdAt: new Date().toISOString()
+        role: 'user',
+        createdAt: new Date().toISOString(),
+        userType: 'regular', // Add explicit user type
+        isAdmin: false // Add explicit admin flag
       });
       
       setSuccess("User created successfully!");

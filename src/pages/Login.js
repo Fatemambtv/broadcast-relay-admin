@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { User, Lock } from 'lucide-react';
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { ref, set, onValue } from "firebase/database";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { ref, set } from "firebase/database";
 import { auth, db, Realtimedb } from "../util/firebase";
 import { Link } from 'react-router-dom';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -14,34 +14,12 @@ const Login = ({ onLogin }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [isAlreadyLoggedIn, setIsAlreadyLoggedIn] = useState(false);
-
-  // Check if user is already logged in elsewhere
-  useEffect(() => {
-    if (username) {
-      const loggedInUserRef = ref(Realtimedb, `loggedInUsers/${username}`);
-      onValue(loggedInUserRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data && data.login_status) {
-          setIsAlreadyLoggedIn(true);
-        } else {
-          setIsAlreadyLoggedIn(false);
-        }
-      });
-    }
-  }, [username]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     
     if (!username || !password) {
       setError('Please enter both username and password');
-      return;
-    }
-    
-    // Check if user is already logged in elsewhere
-    if (isAlreadyLoggedIn) {
-      setError('Only 1 login allowed per user. Please logout from other device and refresh.');
       return;
     }
     
@@ -68,17 +46,39 @@ const Login = ({ onLogin }) => {
           login_status: true,
           last_login: new Date().toISOString(),
           last_activity: new Date().toISOString(),
-          name: userData.name
+          name: userData.name || username
         });
         
         // Call the onLogin callback with user data
         onLogin({ 
           username, 
-          name: userData.name,
+          name: userData.name || username,
           uid: userCredential.user.uid
         });
       } else {
-        setError('User data not found');
+        // Create user document if it doesn't exist
+        const userData = {
+          name: username,
+          its: username,
+          role: 'user',
+          createdAt: new Date().toISOString()
+        };
+        await setDoc(userRef, userData);
+        
+        // Update login status in Realtime Database
+        await set(ref(Realtimedb, `loggedInUsers/${username}`), {
+          login_status: true,
+          last_login: new Date().toISOString(),
+          last_activity: new Date().toISOString(),
+          name: username
+        });
+        
+        // Call the onLogin callback with user data
+        onLogin({ 
+          username, 
+          name: username,
+          uid: userCredential.user.uid
+        });
       }
     } catch (error) {
       setError('Login failed: ' + error.message);
