@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { HiOutlineRefresh } from 'react-icons/hi';
 import { CgLogOut } from 'react-icons/cg';
-import { RiDeleteBinLine } from 'react-icons/ri';
+import { RiDeleteBinLine, RiRefreshLine, RiKeyLine } from 'react-icons/ri';
 import { IoEyeOutline, IoEyeOffOutline } from 'react-icons/io5';
 import { doc, setDoc, collection, getDocs, deleteDoc, getDoc } from "firebase/firestore";
 import { ref, set, onValue, get } from "firebase/database";
 import { db, Realtimedb, auth } from "../util/firebase";
-import { createUserWithEmailAndPassword, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser } from 'firebase/auth';
-import LoadingSpinner from '../components/LoadingSpinner';
-import '../styles/UserManagement.css';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import UserIcon from '../assets/icons/UserIcon';
+import '../styles/index.css';
 
 const UserManagement = () => {
   const [its, setITS] = useState('');
@@ -88,10 +88,11 @@ const UserManagement = () => {
       const usersCollection = collection(db, "users");
       const usersSnapshot = await getDocs(usersCollection);
       const usersData = usersSnapshot.docs
-        .filter(doc => !doc.data().isAdmin) // Exclude admin users using the flag
+        .filter(doc => !doc.data().isAdmin)
         .map(doc => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
+          showPassword: false // Add showPassword flag
         }));
       setUsers(usersData);
       setLoading(false);
@@ -105,22 +106,17 @@ const UserManagement = () => {
     fetchUsers();
   }, []);
 
-  // Replace the existing generatePassword function with this one
   const generatePassword = (name, its) => {
     if (name && name.length > 0 && its && its.length > 0) {
-      // Create a more secure random password
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$';
       let randomPassword = '';
       
-      // Start with first letter of name (lowercase)
       randomPassword += name.charAt(0).toLowerCase();
       
-      // Add last 4 digits of PRN if available
       if (its.length >= 4) {
         randomPassword += its.slice(-4);
       }
       
-      // Add random characters to make password at least 8 characters long
       while (randomPassword.length < 8) {
         randomPassword += chars.charAt(Math.floor(Math.random() * chars.length));
       }
@@ -129,7 +125,7 @@ const UserManagement = () => {
     } else {
       setPassword('');
     }
-  }
+  };
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -159,14 +155,14 @@ const UserManagement = () => {
       
       const uid = userCredential.user.uid;
       
-      // Store metadata in Firestore with clear role separation
+      // Store metadata in Firestore
       await setDoc(doc(db, "users", uid), {
         name,
         its,
         role: 'user',
         createdAt: new Date().toISOString(),
-        userType: 'regular', // Add explicit user type
-        isAdmin: false // Add explicit admin flag
+        userType: 'regular',
+        isAdmin: false
       });
       
       setSuccess("User created successfully!");
@@ -188,25 +184,19 @@ const UserManagement = () => {
       try {
         setLoading(true);
         
-        // Get the user document from Firestore first to get the ITS
+        // Get the user document from Firestore
         const userDoc = await getDoc(doc(db, "users", uid));
         const userData = userDoc.data();
         
         if (userData && userData.its) {
-          // Delete from Firebase Authentication if possible
-          try {
-            // This would require admin SDK in a real implementation
-            // For client-side, we'll just handle Firestore and Realtime DB
-            console.log("Would delete auth user if this was server-side");
-          } catch (authErr) {
-            console.error("Error deleting auth user:", authErr);
-          }
+          // Delete from Firebase Authentication (client-side note)
+          console.log("Would delete auth user if this was server-side");
         }
         
         // Delete from Firestore
         await deleteDoc(doc(db, "users", uid));
         
-        // Also delete from Realtime Database
+        // Delete from Realtime Database
         if (userData && userData.its) {
           await set(ref(Realtimedb, `loggedInUsers/${userData.its}`), null);
         }
@@ -235,9 +225,8 @@ const UserManagement = () => {
     } finally {
       setLoading(false);
     }
-  }
-  
-  // Add new function to handle password change
+  };
+
   const handleChangePassword = async (userId) => {
     const newPassword = prompt("Enter new password for user:");
     if (!newPassword) {
@@ -247,25 +236,8 @@ const UserManagement = () => {
     
     try {
       setLoading(true);
-      
-      // In a real implementation, this would require admin SDK or user to be logged in
-      // For client-side demo, we'll show the concept
       setSuccess(`Password for user would be changed (requires Firebase Admin SDK)`);
       setError(null);
-      
-      // Note: In a real implementation with proper authentication:
-      // const user = auth.currentUser;
-      // if (user.uid !== userId) {
-      //   setError("Only the user can change their own password.");
-      //   return;
-      // }
-      // const credential = EmailAuthProvider.credential(
-      //   `${userId}@broadcastrelay.com`, 
-      //   prompt("Enter current password:")
-      // );
-      // await reauthenticateWithCredential(user, credential);
-      // await updatePassword(user, newPassword);
-      
     } catch (err) {
       setError(err.message);
       setSuccess(null);
@@ -298,175 +270,168 @@ const UserManagement = () => {
   };
 
   return (
-    <div className="user-management-container">
-      <h1 className="page-title">User Management</h1>
+    <div className="card">
+      <h1 className="title">User Management</h1>
       
-      {/* Message displays */}
-      {error && <div className="error-message show">{error}</div>}
-      {success && <div className="success-message show">{success}</div>}
+      {error && <div className="error-message" aria-live="polite">{error}</div>}
+      {success && <div className="success-message" aria-live="polite">{success}</div>}
       
-      {/* User registration form */}
-      <div className="user-form-card">
-        <h2>Add New User</h2>
-        <div className="user-form">
-          <div className="form-group">
-            <label htmlFor="name">Full Name</label>
+      <div className="section">
+        <h2 className="subtitle">Add New User</h2>
+        <div className="form-group">
+          <div className="form-field">
+            <label htmlFor="name" className="form-label">Full Name</label>
             <input
+              className="input"
               type="text"
               id="name"
               placeholder="Enter user's full name"
               value={name}
               onChange={handleNameChange}
+              aria-label="Full name"
             />
           </div>
           
-          <div className="form-group">
-            <label htmlFor="its">User ID</label>
+          <div className="form-field">
+            <label htmlFor="its" className="form-label">User ID</label>
             <input
+              className="input"
               type="text"
               id="its"
               placeholder="Enter user ID"
               value={its}
               onChange={handleITSChange}
               maxLength={8}
+              aria-label="User ID"
             />
           </div>
           
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <div className="password-field">
+          <div className="form-field">
+            <label htmlFor="password" className="form-label">Password</label>
+            <div className="input-group">
               <input
+                className="input input-with-button"
                 type="text"
                 id="password"
                 placeholder="Password will be generated"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                readOnly={false}
+                aria-label="Password"
               />
               <button 
-                className="generate-btn"
+                className="flat-button"
                 onClick={() => generatePassword(name, its)}
                 title="Generate Password"
+                aria-label="Generate password"
               >
-                <i className="fas fa-sync-alt"></i>
+                <RiRefreshLine size={16} />
               </button>
             </div>
           </div>
           
           <button 
-            className="btn-primary"
+            className="button button-primary form-button"
             onClick={() => handleSignUp(its, password, name)}
             disabled={loading}
           >
-            {loading ? <LoadingSpinner size="small" color="white" text="" /> : 'Add User'}
+            {loading ? <div className="spinner spinner-small spinner-primary" /> : 'Add User'}
           </button>
         </div>
       </div>
       
-      {/* User list section */}
-      <div className="users-list-card">
-        <div className="users-header">
-          <h2>Registered Users</h2>
-          <div className="users-actions">
-            <div className="search-container">
-              <input
-                type="text"
-                placeholder="Search by name or ID..."
-                value={searchTerm}
-                onChange={handleSearch}
-              />
-            </div>
+      {/* <div className="section"> */}
+        <div className="section-header">
+          <h2 className="subtitle">Registered Users</h2>
+          <div className="section-controls">
+            <input
+              className="input search-input"
+              type="text"
+              placeholder="Search by name or ID..."
+              value={searchTerm}
+              onChange={handleSearch}
+              aria-label="Search users"
+            />
             <button 
-              className="reload-btn" 
+              className="flat-button"
               onClick={fetchUsers}
               title="Refresh user list"
+              aria-label="Refresh user list"
             >
-              <HiOutlineRefresh />
+              <HiOutlineRefresh size={18} />
             </button>
           </div>
         </div>
         
         {loading ? (
-          <LoadingSpinner text="Loading users..." />
+          <div className="text-center" aria-live="polite">
+            <div className="spinner spinner-medium spinner-primary" />
+            <p className="mt-2">Loading users...</p>
+          </div>
         ) : (
           <>
             {filteredUsers.length === 0 ? (
-              <div className="no-users-message">
-                <p>No users found.</p>
-              </div>
+              <p className="text-center">No users found.</p>
             ) : (
-              <div className="users-table-container">
-                <table className="users-table">
-                  <thead>
-                    <tr>
-                      <th>Status</th>
-                      <th>Name</th>
-                      <th>User ID</th>
-                      <th>Password</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredUsers.map(user => (
-                      <tr key={user.id} className={onlineStatus[user.id]?.login_status ? 'user-online' : ''}>
-                        <td>
-                          <span 
-                            className="status-indicator" 
-                            style={{ 
-                              backgroundColor: onlineStatus[user.id]?.login_status ? '#2ecc71' : '#e74c3c' 
-                            }}
-                            title={onlineStatus[user.id]?.login_status ? 'Online' : 'Offline'}
-                          ></span>
-                        </td>
-                        <td>{user.name}</td>
-                        <td>{user.id}</td>
-                        <td className="password-cell">
-                          <div className="password-container">
-                            <span>{user.showPassword ? user.password : '••••••••'}</span>
-                            <button 
-                              className="password-visibility-toggle" 
-                              onClick={() => handleTogglePassword(user.id)}
-                              title={user.showPassword ? "Hide password" : "Show password"}
-                            >
-                              {user.showPassword ? <IoEyeOffOutline /> : <IoEyeOutline />}
-                            </button>
-                            {/* Add password change button */}
-                            <button 
-                              className="btn-action btn-change-password" 
-                              onClick={() => handleChangePassword(user.id)}
-                              title="Change password"
-                            >
-                              <i className="fas fa-key"></i>
-                            </button>
-                          </div>
-                        </td>
-                        <td className="actions-cell">
-                          {onlineStatus[user.id]?.login_status && (
-                            <button 
-                              className="btn-action" 
-                              onClick={() => handleSignOut(user.id)}
-                              title="Sign out user"
-                            >
-                              <CgLogOut />
-                            </button>
-                          )}
-                          <button 
-                            className="btn-action" 
-                            onClick={() => handleDeleteUser(user.id)}
-                            title="Delete user"
-                          >
-                            <RiDeleteBinLine />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="user-list">
+                {filteredUsers.map(user => (
+                  <div key={user.id} className="user-row">
+                    <div className="user-info">
+                      <UserIcon className="user-icon" aria-label="User" />
+                      <span className="user-name">{user.name}</span>
+                      <span className="user-id">ID: {user.id}</span>
+                      <span 
+                        className="status-dot"
+                        style={{ 
+                          backgroundColor: onlineStatus[user.id]?.login_status ? 'var(--success)' : 'var(--danger)'
+                        }}
+                        title={onlineStatus[user.id]?.login_status ? 'Online' : 'Offline'}
+                        aria-label={onlineStatus[user.id]?.login_status ? 'User online' : 'User offline'}
+                      />
+                    </div>
+                    <div className="row-actions">
+                      <span className="password-text">{user.showPassword ? user.password : '••••••••'}</span>
+                      <button 
+                        className="flat-button"
+                        onClick={() => handleTogglePassword(user.id)}
+                        title={user.showPassword ? "Hide password" : "Show password"}
+                        aria-label={user.showPassword ? "Hide password" : "Show password"}
+                      >
+                        {user.showPassword ? <IoEyeOffOutline size={16} /> : <IoEyeOutline size={16} />}
+                      </button>
+                      <button 
+                        className="flat-button"
+                        onClick={() => handleChangePassword(user.id)}
+                        title="Change password"
+                        aria-label="Change password"
+                      >
+                        <RiKeyLine size={16} />
+                      </button>
+                      {onlineStatus[user.id]?.login_status && (
+                        <button 
+                          className="flat-button warning-icon"
+                          onClick={() => handleSignOut(user.id)}
+                          title="Sign out user"
+                          aria-label="Sign out user"
+                        >
+                          <CgLogOut size={16} />
+                        </button>
+                      )}
+                      <button 
+                        className="flat-button danger-icon"
+                        onClick={() => handleDeleteUser(user.id)}
+                        title="Delete user"
+                        aria-label="Delete user"
+                      >
+                        <RiDeleteBinLine size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </>
         )}
-      </div>
+      {/* </div> */}
     </div>
   );
 };

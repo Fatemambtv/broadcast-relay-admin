@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { User, Lock } from 'lucide-react';
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { ref, set } from "firebase/database";
 import { auth, db, Realtimedb } from "../util/firebase";
 import { Link } from 'react-router-dom';
-import LoadingSpinner from '../components/LoadingSpinner';
-import '../styles/Login.css';  // Updated to use the styles directory version
+import BroadcastIcon from '../assets/icons/BroadcastIcon';
+import { RiUserLine, RiLockLine, RiEyeLine, RiEyeOffLine } from 'react-icons/ri';
+import '../styles/index.css';
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('');
@@ -88,75 +88,78 @@ const Login = ({ onLogin }) => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <div className="login-header">
-          <img 
-            src="https://img.icons8.com/fluency/96/000000/broadcast.png" 
-            alt="Broadcast Relay Logo" 
-            className="login-logo"
-          />
-          <h1>Broadcast Relay</h1>
-          <p>Admin Portal</p>
+    <div className="container">
+      <div className="card" style={{ maxWidth: '400px' }}>
+        <div className="text-center mb-3">
+          <BroadcastIcon style={{ width: 80, height: 80 }} />
+          <h1 className="title">Broadcast Relay</h1>
+          <p className="subtitle">Admin Portal</p>
         </div>
         
-        <form className="login-form" onSubmit={handleLogin}>
-          {error && <div className="error-message">{error}</div>}
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          {error && <div className="error-message" aria-live="polite">{error}</div>}
           
-          <div className="form-group">
-            <label htmlFor="username">Username</label>
-            <div className="input-with-icon">
-              <User className="input-icon" size={18} />
-              <input
-                id="username"
-                type="text"
-                placeholder="Enter your username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                disabled={loading}
-              />
-            </div>
+          <div style={{ position: 'relative' }}>
+            <RiUserLine style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
+            <input
+              className="input"
+              type="text"
+              placeholder="Enter your username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              disabled={loading}
+              aria-label="Username"
+              style={{ paddingLeft: '40px' }}
+            />
           </div>
           
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <div className="input-with-icon">
-              <Lock className="input-icon" size={18} />
-              <input
-                type={showPassword ? "text" : "password"}
-                id="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="password-input"
-              />
-              <button
-                type="button"
-                className="toggle-password-btn"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                <i className={showPassword ? "fas fa-eye-slash" : "fas fa-eye"}></i>
-              </button>
-            </div>
+          <div style={{ position: 'relative' }}>
+            <RiLockLine style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
+            <input
+              className="input"
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
+              aria-label="Password"
+              style={{ paddingLeft: '40px', paddingRight: '40px' }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: 'absolute',
+                right: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: 'var(--primary-color)',
+              }}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? <RiEyeOffLine size={18} /> : <RiEyeLine size={18} />}
+            </button>
           </div>
           
           <button 
             type="submit" 
-            className="login-button"
+            className="button button-primary"
             disabled={loading}
           >
-            {loading ? <LoadingSpinner size="small" color="white" text="" /> : 'Login'}
+            {loading ? <div className="spinner spinner-small spinner-primary" /> : 'Login'}
           </button>
           
-          {/* Add registration link */}
-          <div className="register-link">
-            New admin? <Link to="/register">Register here</Link>
-          </div>
+          <p className="text-center mt-2">
+            New admin? <Link to="/register" style={{ color: 'var(--primary-color)' }}>Register here</Link>
+          </p>
         </form>
         
-        <div className="login-footer">
-          <p>© {new Date().getFullYear()} Broadcast Relay. All rights reserved.</p>
-        </div>
+        <p className="text-center mt-3" style={{ fontSize: '12px', color: 'var(--text-light)' }}>
+          © {new Date().getFullYear()} Broadcast Relay. All rights reserved.
+        </p>
       </div>
     </div>
   );

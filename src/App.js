@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import './styles/App.css';
+import { ref, set } from "firebase/database";
+import { Realtimedb } from "./util/firebase";
 import { clearAuthData, getAuthData, setAuthData } from "./util/auth";
 import Login from "./pages/Login";
-import Register from "./pages/Register"; // Import the new Register component
+import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import UserManagement from "./pages/UserManagement";
 import ServerControl from "./pages/ServerControl";
 import Settings from "./pages/Settings";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { ref, set } from "firebase/database";
-import { Realtimedb } from "./util/firebase";
+import './styles/index.css';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -33,19 +33,19 @@ function App() {
       if (authData && authData.username) {
         // Update last activity on initial load
         updateLastActivity(authData.username);
-        
+
         // Set up event listeners for user activity
         const activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart'];
-        
+
         const activityHandler = () => {
           updateLastActivity(authData.username);
         };
-        
+
         // Add event listeners
         activityEvents.forEach(event => {
           window.addEventListener(event, activityHandler);
         });
-        
+
         // Clean up event listeners
         return () => {
           activityEvents.forEach(event => {
@@ -55,10 +55,10 @@ function App() {
       }
     }
   }, [isLoggedIn]);
-  
+
   // Function to update last activity timestamp
   const updateLastActivity = (username) => {
-    set(ref(Realtimedb, `loggedInUsers/${username}/last_activity`), new Date().toISOString());
+    set(ref (Realtimedb, `loggedInUsers/${username}/last_activity`), new Date().toISOString());
   };
 
   const handleLogin = (user) => {
@@ -67,59 +67,71 @@ function App() {
   };
 
   const handleLogout = () => {
+    const authData = getAuthData();
+    if (authData && authData.username) {
+      // Clear user activity on logout
+      set(ref(Realtimedb, `loggedInUsers/${authData.username}`), null);
+    }
     clearAuthData();
-    setIsLoggedIn(false); // Update isLoggedIn in App to display login screen
+    setIsLoggedIn(false); // Update isLoggedIn to display login screen
   };
 
   if (loading) {
-    return <div className="loading-screen">Loading...</div>;
+    return (
+      <div className="container">
+        <div className="card text-center" aria-live="polite">
+          <div className="spinner spinner-medium spinner-primary" />
+          <p className="mt-2">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <Router>
-      <div className="app-container">
+      <div className="container">
         {isLoggedIn && <Navbar onLogout={handleLogout} />}
-        <div className="content-container">
+        <div className="card">
           <Routes>
-            <Route 
-              path="/login" 
-              element={isLoggedIn ? <Navigate to="/dashboard" /> : <Login onLogin={handleLogin} />} 
+            <Route
+              path="/login"
+              element={isLoggedIn ? <Navigate to="/dashboard" /> : <Login onLogin={handleLogin} />}
             />
-            <Route 
-              path="/register" 
-              element={isLoggedIn ? <Navigate to="/dashboard" /> : <Register />} 
+            <Route
+              path="/register"
+              element={isLoggedIn ? <Navigate to="/dashboard" /> : <Register />}
             />
-            <Route 
-              path="/dashboard" 
+            <Route
+              path="/dashboard"
               element={
                 <ProtectedRoute isLoggedIn={isLoggedIn}>
                   <Dashboard />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/users" 
+            <Route
+              path="/users"
               element={
                 <ProtectedRoute isLoggedIn={isLoggedIn}>
                   <UserManagement />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/servers" 
+            <Route
+              path="/servers"
               element={
                 <ProtectedRoute isLoggedIn={isLoggedIn}>
                   <ServerControl />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/settings" 
+            <Route
+              path="/settings"
               element={
                 <ProtectedRoute isLoggedIn={isLoggedIn}>
                   <Settings />
                 </ProtectedRoute>
-              } 
+              }
             />
             <Route path="/" element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} />} />
           </Routes>

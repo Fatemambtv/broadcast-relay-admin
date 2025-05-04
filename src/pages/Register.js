@@ -1,34 +1,26 @@
 import React, { useState } from 'react';
-import { User, Lock, UserPlus } from 'lucide-react';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import { auth, db } from "../util/firebase";
+import { ref, set } from "firebase/database";
+import { auth, db, Realtimedb } from "../util/firebase";
 import { Link, useNavigate } from 'react-router-dom';
-import LoadingSpinner from '../components/LoadingSpinner';
-import './Login.css'; // Reuse login styles
+import BroadcastIcon from '../assets/icons/BroadcastIcon';
+import { RiUserLine, RiLockLine, RiEyeLine, RiEyeOffLine } from 'react-icons/ri';
+import '../styles/index.css';
 
 const Register = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [name, setName] = useState('');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
     
-    if (!username || !password || !name || !confirmPassword) {
-      setError('Please fill in all fields');
-      return;
-    }
-    
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
+    if (!username || !password) {
+      setError('Please enter both username and password');
       return;
     }
     
@@ -43,26 +35,25 @@ const Register = () => {
         password
       );
       
-      // Update profile with display name
-      await updateProfile(userCredential.user, { 
-        displayName: name 
+      // Store user data in Firestore
+      const userData = {
+        name: username,
+        its: username,
+        role: 'user',
+        createdAt: new Date().toISOString()
+      };
+      await setDoc(doc(db, "users", userCredential.user.uid), userData);
+      
+      // Update login status in Realtime Database
+      await set(ref(Realtimedb, `loggedInUsers/${username}`), {
+        login_status: true,
+        last_login: new Date().toISOString(),
+        last_activity: new Date().toISOString(),
+        name: username
       });
       
-      // Store additional user data in Firestore
-      await setDoc(doc(db, 'users', userCredential.user.uid), {
-        name,
-        username,
-        role: 'admin',
-        created_at: new Date().toISOString()
-      });
-      
-      setSuccess('Registration successful! Redirecting to login...');
-      
-      // Redirect to login page after successful registration
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
-      
+      // Auto-login by navigating to dashboard
+      navigate('/dashboard');
     } catch (error) {
       setError('Registration failed: ' + error.message);
     } finally {
@@ -71,112 +62,78 @@ const Register = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <div className="login-header">
-          <img 
-            src="https://img.icons8.com/fluency/96/000000/broadcast.png" 
-            alt="Broadcast Relay Logo" 
-            className="login-logo"
-          />
-          <h1>Broadcast Relay</h1>
-          <p>Admin Registration</p>
+    <div className="container">
+      <div className="card" style={{ maxWidth: '400px' }}>
+        <div className="text-center mb-3">
+          <BroadcastIcon style={{ width: 80, height: 80 }} />
+          <h1 className="title">Broadcast Relay</h1>
+          <p className="subtitle">Register Admin</p>
         </div>
         
-        <form className="login-form" onSubmit={handleRegister}>
-          {error && <div className="error-message">{error}</div>}
-          {success && <div className="success-message">{success}</div>}
+        <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          {error && <div className="error-message" aria-live="polite">{error}</div>}
           
-          <div className="form-group">
-            <label htmlFor="name">Full Name</label>
-            <div className="input-with-icon">
-              <UserPlus className="input-icon" size={18} />
-              <input
-                id="name"
-                type="text"
-                placeholder="Enter your full name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                disabled={loading}
-              />
-            </div>
+          <div style={{ position: 'relative' }}>
+            <RiUserLine style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
+            <input
+              className="input"
+              type="text"
+              placeholder="Choose a username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              disabled={loading}
+              aria-label="Username"
+              style={{ paddingLeft: '40px' }}
+            />
           </div>
           
-          <div className="form-group">
-            <label htmlFor="username">Username</label>
-            <div className="input-with-icon">
-              <User className="input-icon" size={18} />
-              <input
-                id="username"
-                type="text"
-                placeholder="Choose a username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                disabled={loading}
-              />
-            </div>
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <div className="input-with-icon">
-              <Lock className="input-icon" size={18} />
-              <input
-                type={showPassword ? "text" : "password"}
-                id="password"
-                placeholder="Create a password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="password-input"
-              />
-              <button
-                type="button"
-                className="toggle-password-btn"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                <i className={showPassword ? "fas fa-eye-slash" : "fas fa-eye"}></i>
-              </button>
-            </div>
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <div className="input-with-icon">
-              <Lock className="input-icon" size={18} />
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                id="confirmPassword"
-                placeholder="Confirm your password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="password-input"
-              />
-              <button
-                type="button"
-                className="toggle-password-btn"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                <i className={showConfirmPassword ? "fas fa-eye-slash" : "fas fa-eye"}></i>
-              </button>
-            </div>
+          <div style={{ position: 'relative' }}>
+            <RiLockLine style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
+            <input
+              className="input"
+              type={showPassword ? "text" : "password"}
+              placeholder="Choose a password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
+              aria-label="Password"
+              style={{ paddingLeft: '40px', paddingRight: '40px' }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: 'absolute',
+                right: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: 'var(--primary-color)',
+              }}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? <RiEyeOffLine size={18} /> : <RiEyeLine size={18} />}
+            </button>
           </div>
           
           <button 
             type="submit" 
-            className="login-button"
+            className="button button-primary"
             disabled={loading}
           >
-            {loading ? <LoadingSpinner size="small" color="white" text="" /> : 'Register'}
+            {loading ? <div className="spinner spinner-small spinner-primary" /> : 'Register'}
           </button>
           
-          <div className="register-link">
-            Already have an account? <Link to="/login">Login</Link>
-          </div>
+          <p className="text-center mt-2">
+            Already have an account? <Link to="/login" style={{ color: 'var(--primary-color)' }}>Login here</Link>
+          </p>
         </form>
         
-        <div className="login-footer">
-          <p>© {new Date().getFullYear()} Broadcast Relay. All rights reserved.</p>
-        </div>
+        <p className="text-center mt-3" style={{ fontSize: '12px', color: 'var(--text-light)' }}>
+          © {new Date().getFullYear()} Broadcast Relay. All rights reserved.
+        </p>
       </div>
     </div>
   );

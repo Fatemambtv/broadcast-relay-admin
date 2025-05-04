@@ -1,216 +1,167 @@
 import React, { useState, useEffect } from 'react';
-import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
-import { auth } from "../util/firebase";
-import { getAuthData } from "../util/auth";
-import LoadingSpinner from '../components/LoadingSpinner';
-import '../styles/Settings.css';
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { auth, db } from "../util/firebase";
+import { updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+import SettingsIcon from '../assets/icons/SettingsIcon';
+import { RiUserLine, RiLockLine } from 'react-icons/ri';
+import { getAuthData } from '../util/auth';
+import '../styles/index.css';
 
 const Settings = () => {
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-  const [adminPassword, setAdminPassword] = useState('');
+  const [name, setName] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
-  // Remove the useEffect that fetches admin data from Realtime Database
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
-  const showMessage = (msg) => {
-    setMessage(msg);
-    setTimeout(() => {
-      setMessage('');
-    }, 3000);
-  };
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const authData = getAuthData();
+        if (authData && authData.uid) {
+          const userRef = doc(db, 'users', authData.uid);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            setName(userSnap.data().name || authData.username);
+          }
+        }
+      } catch (err) {
+        setError('Failed to load user data: ' + err.message);
+      }
+    };
+    fetchUserData();
+  }, []);
 
-  const handleChangePassword = async () => {
-    if (!adminPassword) {
-      showMessage('Please enter your current password.');
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    if (!name) {
+      setError('Please enter a name');
       return;
     }
-    
-    if (!newPassword) {
-      showMessage('Please enter a new password.');
-      return;
-    }
-    
-    if (newPassword !== confirmPassword) {
-      showMessage('New passwords do not match.');
-      return;
-    }
-    
     try {
       setLoading(true);
-      
-      const user = auth.currentUser;
-      if (!user) {
-        showMessage('You must be logged in to change your password.');
-        setLoading(false);
-        return;
-      }
-      
-      // Get the email from the current user
+      setError(null);
       const authData = getAuthData();
-      const email = `${authData.username}@broadcastrelay.com`;
-      
-      // Re-authenticate the user
-      const credential = EmailAuthProvider.credential(email, adminPassword);
-      await reauthenticateWithCredential(user, credential);
-      
-      // Update the password
-      await updatePassword(user, newPassword);
-      
-      showMessage('Password updated successfully!');
-      setAdminPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      
-    } catch (error) {
-      console.error("Error changing password:", error);
-      
-      // Provide more specific error messages
-      if (error.code === 'auth/wrong-password') {
-        showMessage('Current password is incorrect.');
-      } else if (error.code === 'auth/requires-recent-login') {
-        showMessage('For security reasons, please log out and log back in before changing your password.');
-      } else {
-        showMessage('Error changing password: ' + error.message);
+      if (authData && authData.uid) {
+        // Update Firestore
+        await setDoc(doc(db, 'users', authData.uid), { name }, { merge: true });
+        // Update Auth profile
+        await updateProfile(auth.currentUser, { displayName: name });
+        setSuccess('Profile updated successfully!');
       }
+    } catch (err) {
+      setError('Failed to update profile: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    if (!currentPassword || !newPassword) {
+      setError('Please enter both current and new passwords');
+      return;
+    }
+    try {
+      setLoading(true);
+      setError(null);
+      const authData = getAuthData();
+      const credential = EmailAuthProvider.credential(
+        `${authData.username}@broadcastrelay.com`,
+        currentPassword
+      );
+      await reauthenticateWithCredential(auth.currentUser, credential);
+      await updatePassword(auth.currentUser, newPassword);
+      setSuccess('Password updated successfully!');
+      setCurrentPassword('');
+      setNewPassword('');
+    } catch (err) {
+      setError('Failed to update password: ' + err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="settings-container">
-      <h1 className="page-title">Settings</h1>
-      
-      {message && <div className="message-container show">{message}</div>}
-      
-      <div className="settings-card">
-        <h2>Change Admin Password</h2>
+    // <div className="container">
+      <div className="card">
+        {/* <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
+          <SettingsIcon style={{ width: 40, height: 40, color: 'var(--primary-color)' }} aria-label="Settings" />
+          <h1 className="title">Settings</h1>
+        </div> */}
         
-        <div className="form-group">
-          <label htmlFor="currentPassword">Current Password</label>
-          <div className="password-input-group">
-            <input
-              id="currentPassword"
-              type={showCurrentPassword ? "text" : "password"}
-              placeholder="Enter current password"
-              value={adminPassword}
-              onChange={(e) => setAdminPassword(e.target.value)}
-            />
+        <h1 className="title">Settings</h1>
+
+        {error && <div className="error-message" aria-live="polite">{error}</div>}
+        {success && <div className="success-message" aria-live="polite">{success}</div>}
+        
+        <div className="card mb-3">
+          <h2 className="subtitle">Update Profile</h2>
+          <form onSubmit={handleProfileUpdate} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <div style={{ position: 'relative' }}>
+              <RiUserLine style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
+              <input
+                className="input"
+                type="text"
+                placeholder="Enter your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={loading}
+                aria-label="Name"
+                style={{ paddingLeft: '40px' }}
+              />
+            </div>
             <button 
-              type="button" 
-              className="toggle-password-btn"
-              onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+              type="submit" 
+              className="button button-primary"
+              disabled={loading}
             >
-              {showCurrentPassword ? 'Hide' : 'Show'}
+              {loading ? <div className="spinner spinner-small spinner-primary" /> : 'Update Profile'}
             </button>
-          </div>
+          </form>
         </div>
         
-        <div className="form-group">
-          <label htmlFor="newPassword">New Password</label>
-          <div className="password-input-group">
-            <input
-              id="newPassword"
-              type={showNewPassword ? "text" : "password"}
-              placeholder="Enter new password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
+        <div className="card">
+          <h2 className="subtitle">Change Password</h2>
+          <form onSubmit={handlePasswordChange} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <div style={{ position: 'relative' }}>
+              <RiLockLine style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
+              <input
+                className="input"
+                type="password"
+                placeholder="Current password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                disabled={loading}
+                aria-label="Current password"
+                style={{ paddingLeft: '40px' }}
+              />
+            </div>
+            <div style={{ position: 'relative' }}>
+              <RiLockLine style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
+              <input
+                className="input"
+                type="password"
+                placeholder="New password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                disabled={loading}
+                aria-label="New password"
+                style={{ paddingLeft: '40px' }}
+              />
+            </div>
             <button 
-              type="button" 
-              className="toggle-password-btn"
-              onClick={() => setShowNewPassword(!showNewPassword)}
+              type="submit" 
+              className="button button-primary"
+              disabled={loading}
             >
-              {showNewPassword ? 'Hide' : 'Show'}
+              {loading ? <div className="spinner spinner-small spinner-primary" /> : 'Change Password'}
             </button>
-          </div>
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="confirmPassword">Confirm New Password</label>
-          <div className="password-input-group">
-            <input
-              type={showConfirmPassword ? "text" : "password"}
-              id="confirmPassword"
-              placeholder="Confirm new password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-            <button
-              type="button"
-              className="toggle-password-btn"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            >
-              {showConfirmPassword ? "Hide" : "Show"}
-            </button>
-          </div>
-        </div>
-        
-        <button 
-          className="btn-primary" 
-          onClick={handleChangePassword}
-          disabled={loading}
-        >
-          {loading ? 'Updating...' : 'Update Password'}
-        </button>
-      </div>
-      
-      <div className="settings-card">
-        <h2>System Information</h2>
-        
-        <div className="info-group">
-          <div className="info-item">
-            <span className="info-label">Application Version:</span>
-            <span className="info-value">1.0.0</span>
-          </div>
-          
-          <div className="info-item">
-            <span className="info-label">Last Updated:</span>
-            <span className="info-value">{new Date().toLocaleDateString()}</span>
-          </div>
-          
-          <div className="info-item">
-            <span className="info-label">Database Connection:</span>
-            <span className="info-value success">Connected</span>
-          </div>
-          
-          <div className="info-item">
-            <span className="info-label">Environment:</span>
-            <span className="info-value">{process.env.NODE_ENV || 'development'}</span>
-          </div>
+          </form>
         </div>
       </div>
-      
-      <div className="settings-card">
-        <h2>Help & Support</h2>
-        
-        <div className="support-content">
-          <p>If you need assistance with the Broadcast Relay Admin Portal, please contact the system administrator.</p>
-          
-          <div className="support-links">
-            <a href="mailto:support@example.com" className="support-link">
-              <i className="fas fa-envelope"></i>
-              Email Support
-            </a>
-            
-            <a href="tel:+1234567890" className="support-link">
-              <i className="fas fa-phone"></i>
-              Call Support
-            </a>
-            
-            <a href="#" className="support-link" onClick={(e) => { e.preventDefault(); window.open('/docs', '_blank'); }}>
-              <i className="fas fa-book"></i>
-              Documentation
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
+    // </div>
   );
 };
 

@@ -4,47 +4,61 @@ const SystemControlCard = ({
   loginStatus, 
   eventName, 
   onUpdateLoginStatus, 
-  onUpdateEventName 
+  onUpdateEventName,
+  className = ''
 }) => {
   return (
-    <div className="server-card system-card">
-      <h2>System Controls</h2>
-      <div className="control-group">
-        <label htmlFor="loginStatus" className="toggle-label">
-          <span>
-            <span className={`status-indicator ${loginStatus ? 'status-online' : 'status-offline'}`}></span>
-            Login Status: {loginStatus ? 'Enabled' : 'Disabled'}
-          </span>
-          <label className="toggle-switch">
-            <input
-              type="checkbox"
-              id="loginStatus"
-              checked={loginStatus}
-              onChange={() => onUpdateLoginStatus(!loginStatus)}
-            />
-            <span className="toggle-slider"></span>
+    <div className={`stat-card ${className}`}>
+      <h2 className="subtitle">System Controls</h2>
+      <div className="form-group">
+        <div className="form-field">
+          <div className="status-row">
+            <label htmlFor="loginStatus" className="form-label">
+              Login Status: {loginStatus ? 'Enabled' : 'Disabled'}
+            </label>
+            <div className="status-group">
+              <span
+                className="status-dot"
+                style={{
+                  backgroundColor: loginStatus ? 'var(--primary-color)' : 'var(--danger)',
+                }}
+                title={loginStatus ? 'Enabled' : 'Disabled'}
+                aria-label={`Login status: ${loginStatus ? 'Enabled' : 'Disabled'}`}
+              />
+              <label className="toggle-switch">
+                <input
+                  type="checkbox"
+                  id="loginStatus"
+                  checked={loginStatus}
+                  onChange={() => onUpdateLoginStatus(!loginStatus)}
+                  aria-label="Toggle login status"
+                />
+                <span className="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div className="form-field">
+          <label htmlFor="eventName" className="form-label">
+            Event Name
           </label>
-        </label>
-      </div>
-      <div className="control-group">
-        <label htmlFor="eventName" className="toggle-label">
-          <span>Event Name:</span>
-        </label>
-        <div className="input-group">
           <input
             type="text"
             id="eventName"
+            className="input"
             value={eventName}
-            onChange={(e) => {}}
+            onChange={(e) => onUpdateEventName(e.target.value)}
             placeholder="Enter Event Name"
+            aria-label="Event name"
           />
-          <button 
-            className="btn-primary" 
-            onClick={() => onUpdateEventName(document.getElementById('eventName').value)}
-          >
-            Update
-          </button>
         </div>
+        <button 
+          className="button button-primary form-button" 
+          onClick={() => onUpdateEventName(eventName)}
+          aria-label="Update event name"
+        >
+          Update
+        </button>
       </div>
     </div>
   );
