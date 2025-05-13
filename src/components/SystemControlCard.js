@@ -5,6 +5,7 @@ const SystemControlCard = ({
   eventName, 
   onUpdateLoginStatus, 
   onUpdateEventName,
+  handleEventNameChange,
   className = ''
 }) => {
   return (
@@ -47,7 +48,7 @@ const SystemControlCard = ({
             id="eventName"
             className="input"
             value={eventName}
-            onChange={(e) => onUpdateEventName(e.target.value)}
+            onChange={(e) => handleEventNameChange(e.target.value)}
             placeholder="Enter Event Name"
             aria-label="Event name"
           />

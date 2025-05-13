@@ -1,50 +1,41 @@
 import { useState, useEffect } from 'react';
-import { ref, onValue, set, off } from 'firebase/database';
-import { Realtimedb } from '../util/firebase';
+import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+import { db } from '../util/firebase';
 
 const useServerControls = () => {
   const [servers, setServers] = useState({
     A: { id: '', status: false },
     B: { id: '', status: false },
     C: { id: '', status: false },
-    D: { id: '', status: false },
   });
   const [loginStatus, setLoginStatus] = useState(false);
   const [eventName, setEventName] = useState('');
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    const refs = {
-      loginStatus: ref(Realtimedb, 'loginStatus'),
-      eventName: ref(Realtimedb, 'eventName'),
-      ...Object.fromEntries(
-        ['A', 'B', 'C', 'D'].flatMap((server) => [
-          [`server${server}ID`, ref(Realtimedb, `server${server}ID`)],
-          [`server${server}Status`, ref(Realtimedb, `server${server}Status`)],
-        ])
-      ),
+    const loginStatusRef = doc(db, 'system', 'loginStatus');
+    const eventNameRef = doc(db, 'system', 'eventName');
+    const serverRefs = {
+      A: doc(db, 'servers', 'A'),
+      B: doc(db, 'servers', 'B'),
+      C: doc(db, 'servers', 'C'),
     };
 
-    const listeners = {
-      loginStatus: onValue(refs.loginStatus, (snap) => setLoginStatus(snap.val() || false)),
-      eventName: onValue(refs.eventName, (snap) => setEventName(snap.val() || '')),
-      ...Object.fromEntries(
-        ['A', 'B', 'C', 'D'].flatMap((server) => [
-          [`server${server}ID`, 
-            onValue(refs[`server${server}ID`], (snap) =>
-              setServers((prev) => ({ ...prev, [server]: { ...prev[server], id: snap.val() || '' } }))
-            )
-          ],
-          [`server${server}Status`,
-            onValue(refs[`server${server}Status`], (snap) =>
-              setServers((prev) => ({ ...prev, [server]: { ...prev[server], status: snap.val() || false } }))
-            )
-          ],
-        ])
+    const unsubscribes = [
+      onSnapshot(loginStatusRef, (snap) => setLoginStatus(snap.data()?.status || false)),
+      onSnapshot(eventNameRef, (snap) => setEventName(snap.data()?.name || '')),
+      ...Object.entries(serverRefs).map(([server, ref]) =>
+        onSnapshot(ref, (snap) => {
+          const data = snap.data();
+          setServers((prev) => ({
+            ...prev,
+            [server]: { id: data?.id || '', status: data?.status || false },
+          }));
+        })
       ),
-    };
+    ];
 
-    return () => Object.values(refs).forEach((reference) => off(reference));
+    return () => unsubscribes.forEach((unsubscribe) => unsubscribe());
   }, []);
 
   const showMessage = (msg) => {
@@ -53,13 +44,22 @@ const useServerControls = () => {
   };
 
   const updateServer = async (server, field, value) => {
-    await set(ref(Realtimedb, `server${server}${field}`), value);
-    setServers((prev) => ({ ...prev, [server]: { ...prev[server], [field.toLowerCase()]: value } }));
+    const serverRef = doc(db, 'servers', server);
+    await setDoc(serverRef, { [field.toLowerCase()]: value }, { merge: true });
+    setServers((prev) => ({
+      ...prev,
+      [server]: { ...prev[server], [field.toLowerCase()]: value },
+    }));
     showMessage(`Server ${server} ${field} updated`);
   };
 
+  const handleServerIDChange = (server, id) => {
+    setServers((prev) => ({ ...prev, [server]: { ...prev[server], id } }));
+  };
+
   const updateLoginStatus = async (status) => {
-    await set(ref(Realtimedb, 'loginStatus'), status);
+    const loginStatusRef = doc(db, 'system', 'loginStatus');
+    await setDoc(loginStatusRef, { status });
     setLoginStatus(status);
     showMessage(`Login ${status ? 'enabled' : 'disabled'}`);
   };
@@ -69,12 +69,17 @@ const useServerControls = () => {
       showMessage('Event name cannot be empty');
       return;
     }
-    await set(ref(Realtimedb, 'eventName'), name);
+    const eventNameRef = doc(db, 'system', 'eventName');
+    await setDoc(eventNameRef, { name });
     setEventName(name);
     showMessage('Event name updated');
   };
 
-  return { servers, loginStatus, eventName, message, updateServer, updateLoginStatus, updateEventName };
+  const handleEventNameChange = (name) => {
+    setEventName(name);
+  };
+
+  return { servers, loginStatus, eventName, message, updateServer, handleServerIDChange, updateLoginStatus, updateEventName, handleEventNameChange };
 };
 
 export default useServerControls;

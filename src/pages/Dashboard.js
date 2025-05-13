@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ref, onValue } from "firebase/database";
-import { collection, getDocs } from "firebase/firestore";
-import { Realtimedb, db } from "../util/firebase";
+import { doc, getDoc, collection, getDocs } from "firebase/firestore";
+import { db } from "../util/firebase";
 import UserIcon from '../assets/icons/UserIcon';
 import ServerIcon from '../assets/icons/ServerIcon';
 import { RiUserFollowLine } from 'react-icons/ri';
@@ -12,10 +11,11 @@ const Dashboard = () => {
     totalUsers: 0,
     onlineUsers: 0,
     activeServers: 0,
-    totalServers: 4,
+    totalServers: 3,
     eventName: ''
   });
   const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState(null);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -25,32 +25,31 @@ const Dashboard = () => {
         const totalRegisteredUsers = usersSnapshot.docs
           .filter(doc => doc.data().role !== 'admin')
           .length;
-        
-        const usersRef = ref(Realtimedb, 'loggedInUsers');
-        onValue(usersRef, (snapshot) => {
-          const data = snapshot.val() || {};
-          const users = Object.keys(data).filter(key => key !== 'admin');
-          const onlineUsers = users.filter(user => data[user]?.login_status).length;
-          
-          const serverRef = ref(Realtimedb, 'servers');
-          onValue(serverRef, (serverSnapshot) => {
-            const serverData = serverSnapshot.val() || {};
-            const activeServers = Object.values(serverData).filter(server => server?.status).length;
-            const eventName = serverData.event_name || 'No Event';
-            
-            setStats({
-              totalUsers: totalRegisteredUsers,
-              onlineUsers,
-              activeServers,
-              totalServers: 4,
-              eventName
-            });
-            
-            setLoading(false);
-          });
+
+        const loggedInUsersRef = doc(db, 'system', 'loggedInUsers');
+        const loggedInUsersSnap = await getDoc(loggedInUsersRef);
+        const loggedInUsers = loggedInUsersSnap.data() || {};
+        const onlineUsers = Object.values(loggedInUsers).filter(user => user.login_status).length;
+
+        const serversCollection = collection(db, 'servers');
+        const serversSnapshot = await getDocs(serversCollection);
+        const activeServers = serversSnapshot.docs.filter(doc => doc.data().status).length;
+
+        const eventNameRef = doc(db, 'system', 'eventName');
+        const eventNameSnap = await getDoc(eventNameRef);
+        const eventName = eventNameSnap.data()?.name || 'No Event';
+
+        setStats({
+          totalUsers: totalRegisteredUsers,
+          onlineUsers,
+          activeServers,
+          totalServers: 3,
+          eventName
         });
+
+        setLoading(false);
       } catch (error) {
-        console.error("Error fetching dashboard data:", error);
+        setNotification({ msg: "Error fetching dashboard data: " + error.message, type: "error" });
         setLoading(false);
       }
     };
@@ -69,6 +68,51 @@ const Dashboard = () => {
 
   return (
     <div className="card">
+      {/* Notification Popup */}
+      {notification && (
+        <div
+          className={`popup-message ${notification.type === 'error' ? 'popup-error' : 'popup-success'}`}
+          style={{
+            position: 'fixed',
+            top: 24,
+            right: 24,
+            zIndex: 9999,
+            minWidth: 220,
+            background: notification.type === 'error' ? '#ffebee' : '#e8f5e9',
+            color: notification.type === 'error' ? '#c62828' : '#2e7d32',
+            border: `1px solid ${notification.type === 'error' ? '#c62828' : '#2e7d32'}`,
+            borderRadius: 8,
+            padding: '14px 24px',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+            fontWeight: 500,
+            fontSize: '1rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            animation: 'fadeIn 0.2s'
+          }}
+          role="alert"
+          aria-live="assertive"
+        >
+          <span style={{ flex: 1 }}>{notification.msg}</span>
+          <button
+            onClick={() => setNotification(null)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'inherit',
+              fontSize: 18,
+              cursor: 'pointer',
+              marginLeft: 8,
+              lineHeight: 1
+            }}
+            aria-label="Close notification"
+            tabIndex={0}
+          >
+            ×
+          </button>
+        </div>
+      )}
       <div style={{ width: '100%', maxWidth: '1400px', margin: '0.5rem auto 0' }}>
         <h1 className="title">Dashboard</h1>
         

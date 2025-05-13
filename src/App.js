@@ -133,6 +133,16 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            {/* Add ChatMonitor route */}
+            <Route
+              path="/chats"
+              element={
+                <ProtectedRoute isLoggedIn={isLoggedIn}>
+                  {/** Lazy import if desired */}
+                  {React.createElement(require('./pages/ChatMonitor').default)}
+                </ProtectedRoute>
+              }
+            />
             <Route path="/" element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} />} />
           </Routes>
         </div>

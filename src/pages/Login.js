@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { ref, set } from "firebase/database";
-import { auth, db, Realtimedb } from "../util/firebase";
+import { db, Realtimedb } from "../util/firebase";
 import { Link } from 'react-router-dom';
 import BroadcastIcon from '../assets/icons/BroadcastIcon';
 import { RiUserLine, RiLockLine, RiEyeLine, RiEyeOffLine } from 'react-icons/ri';
@@ -27,59 +26,39 @@ const Login = ({ onLogin }) => {
       setLoading(true);
       setError('');
       
-      // Sign in with Firebase Authentication
-      const userCredential = await signInWithEmailAndPassword(
-        auth, 
-        `${username}@broadcastrelay.com`, 
-        password
-      );
-      
-      // Get additional user data from Firestore
-      const userRef = doc(db, "users", userCredential.user.uid);
+      // Get user data from Firestore
+      const userRef = doc(db, "users", username);
       const userSnap = await getDoc(userRef);
       
-      if (userSnap.exists()) {
-        const userData = userSnap.data();
-        
-        // Update login status in Realtime Database
-        await set(ref(Realtimedb, `loggedInUsers/${username}`), {
-          login_status: true,
-          last_login: new Date().toISOString(),
-          last_activity: new Date().toISOString(),
-          name: userData.name || username
-        });
-        
-        // Call the onLogin callback with user data
-        onLogin({ 
-          username, 
-          name: userData.name || username,
-          uid: userCredential.user.uid
-        });
-      } else {
-        // Create user document if it doesn't exist
-        const userData = {
-          name: username,
-          its: username,
-          role: 'user',
-          createdAt: new Date().toISOString()
-        };
-        await setDoc(userRef, userData);
-        
-        // Update login status in Realtime Database
-        await set(ref(Realtimedb, `loggedInUsers/${username}`), {
-          login_status: true,
-          last_login: new Date().toISOString(),
-          last_activity: new Date().toISOString(),
-          name: username
-        });
-        
-        // Call the onLogin callback with user data
-        onLogin({ 
-          username, 
-          name: username,
-          uid: userCredential.user.uid
-        });
+      if (!userSnap.exists()) {
+        setError('User not found');
+        setLoading(false);
+        return;
       }
+      
+      const userData = userSnap.data();
+      
+      // Check password
+      if (userData.password !== password) {
+        setError('Incorrect password');
+        setLoading(false);
+        return;
+      }
+      
+      // Update login status in Realtime Database
+      await set(ref(Realtimedb, `loggedInUsers/${username}`), {
+        login_status: true,
+        last_login: new Date().toISOString(),
+        last_activity: new Date().toISOString(),
+        name: userData.name || username
+      });
+      
+      // Call the onLogin callback with user data
+      onLogin({ 
+        username, 
+        name: userData.name || username,
+        uid: username
+      });
     } catch (error) {
       setError('Login failed: ' + error.message);
     } finally {

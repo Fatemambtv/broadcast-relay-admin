@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+// Removed: import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { ref, set } from "firebase/database";
-import { auth, db, Realtimedb } from "../util/firebase";
+import { db, Realtimedb } from "../util/firebase";
 import { Link, useNavigate } from 'react-router-dom';
 import BroadcastIcon from '../assets/icons/BroadcastIcon';
 import { RiUserLine, RiLockLine, RiEyeLine, RiEyeOffLine } from 'react-icons/ri';
@@ -28,21 +28,25 @@ const Register = () => {
       setLoading(true);
       setError('');
       
-      // Create user with Firebase Authentication
-      const userCredential = await createUserWithEmailAndPassword(
-        auth, 
-        `${username}@broadcastrelay.com`, 
-        password
-      );
-      
-      // Store user data in Firestore
+      // Check if admin user already exists
+      const adminDoc = await getDoc(doc(db, "users", username));
+      if (adminDoc.exists()) {
+        setError('Admin user already exists with this username');
+        setLoading(false);
+        return;
+      }
+
+      // Store admin user directly in Firestore
       const userData = {
         name: username,
         its: username,
-        role: 'user',
+        password, // Store password directly (consider hashing in production)
+        role: 'admin',
+        userType: 'admin',
+        isAdmin: true,
         createdAt: new Date().toISOString()
       };
-      await setDoc(doc(db, "users", userCredential.user.uid), userData);
+      await setDoc(doc(db, "users", username), userData);
       
       // Update login status in Realtime Database
       await set(ref(Realtimedb, `loggedInUsers/${username}`), {
