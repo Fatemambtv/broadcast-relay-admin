@@ -199,7 +199,7 @@ const AuthComponent = ({ isLoggedIn, onLogout }) => {
                     <span>Last login: {onlineStatus[user.id]?.login_time}</span>
                   </div>
                   <span className="password-container">
-                    <span className="password">{user.showPassword ? user.password : '*****'}</span>
+                    <span className="password">{user.showPassword ? user.password : '*'}</span>
                     <button className="toggle-password" onClick={() => handleTogglePassword(user.id)}>
                       {user.showPassword ? "Hide" : "Show"}
                     </button>

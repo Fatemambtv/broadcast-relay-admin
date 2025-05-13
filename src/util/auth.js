@@ -1,6 +1,6 @@
 // Authentication utility functions
 
-/**
+/*
  * Store authentication data in localStorage
  * @param {Object} userData - User data to store
  */
@@ -11,7 +11,7 @@ export const setAuthData = (userData) => {
   }));
 };
 
-/**
+/*
  * Get authentication data from localStorage
  * @returns {Object|null} User data or null if not authenticated
  */
@@ -43,14 +43,14 @@ export const getAuthData = () => {
   }
 };
 
-/**
+/*
  * Clear authentication data from localStorage
  */
 export const clearAuthData = () => {
   localStorage.removeItem('authData');
 };
 
-/**
+/*
  * Check if the user is authenticated
  * @returns {boolean} True if authenticated, false otherwise
  */
