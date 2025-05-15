@@ -49,6 +49,15 @@ const Navbar = ({ onLogout }) => {
             Servers
           </button>
         </Link>
+        <Link to="/chats">
+          <button
+            className={`nav-button ${isActive('/chats') ? 'nav-button-active' : ''}`}
+            aria-label="Chat Management"
+            aria-current={isActive('/chats') ? 'page' : undefined}
+          >
+            Chats
+          </button>
+        </Link>
         <Link to="/settings">
           <button
             className={`nav-button ${isActive('/settings') ? 'nav-button-active' : ''}`}

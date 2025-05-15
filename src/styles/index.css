@@ -20,6 +20,113 @@
     --glow: 0 0 8px rgba(38, 166, 154, 0.5);
 }
 
+/* Confirmation Dialog Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.25s ease;
+  padding: 2rem;
+}
+
+.modal-content {
+  background: var(--gradient-base);
+  padding: 2.5rem;
+  border-radius: 1.2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), var(--neumorphic-shadow-raised);
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+  animation: modalEnter 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  color: var(--primary-color);
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.modal-content p {
+  margin-bottom: 2rem;
+  color: var(--text-color);
+  font-size: 1.2rem;
+  line-height: 1.5;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1.25rem;
+}
+
+.modal-buttons .button {
+  min-width: 120px;
+  transform: translateY(0);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.modal-buttons .button:hover {
+  transform: translateY(-3px);
+}
+
+@keyframes modalEnter {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 1rem;
+  }
+  
+  .modal-content {
+    padding: 1.75rem 1.25rem;
+    width: 100%;
+  }
+  
+  .modal-buttons {
+    flex-direction: column;
+    gap: 0.85rem;
+    width: 100%;
+    max-width: 250px;
+    margin: 0 auto;
+  }
+  
+  .modal-buttons .button {
+    width: 100%;
+  }
+  
+  .modal-content h2 {
+    font-size: 1.4rem;
+  }
+  
+  .modal-content p {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
 body {
     margin: 0;
     font-family: 'Roboto', sans-serif;
@@ -576,6 +683,124 @@ body {
   border: 1px solid #c62828;
 }
 
+/* Server content scrollable area */
+.server-content {
+  max-height: calc(100vh - 240px); /* Adjust this value if needed to accommodate the header and tabs */
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-color) #f0f0f0;
+  border-radius: 8px;
+  padding-right: 4px;
+  box-shadow: inset 0 -10px 10px -10px rgba(0,0,0,0.05);
+  position: relative;
+}
+
+.server-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.server-content::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 10px;
+}
+
+.server-content::-webkit-scrollbar-thumb {
+  background-color: var(--primary-color);
+  border-radius: 10px;
+  border: 2px solid #f0f0f0;
+}
+
+.server-content::-webkit-scrollbar-thumb:hover {
+  background-color: #1a8c83;
+}
+
+/* Server section layout */
+.server-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--divider);
+  padding-bottom: 0.5rem;
+}
+
+.server-actions {
+  display: flex;
+  align-items: center;
+}
+
+.delete-all-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+.delete-all-btn svg {
+  font-size: 1.1rem;
+}
+
+/* Server Tabs for Chat Monitor */
+.server-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--divider);
+  padding-bottom: 0.5rem;
+}
+
+.server-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--base-color);
+  border: 1px solid var(--divider);
+  border-radius: 2rem;
+  font-weight: 500;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.server-tab:hover {
+  background: #eee;
+  box-shadow: var(--neumorphic-shadow);
+}
+
+.server-tab.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(38, 166, 154, 0.4);
+}
+
+.chat-count {
+  background: rgba(0, 0, 0, 0.1);
+  padding: 0.1rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.server-tab.active .chat-count {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.server-badge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  background: var(--primary-color);
+  color: white;
+  border-radius: 0.25rem;
+  font-weight: 600;
+  margin: 0 0.25rem;
+}
+
 @media (max-width: 768px) {
     .container {
         padding: 1rem 0.5rem;
@@ -583,6 +808,27 @@ body {
 
     .card {
         padding: 1.5rem;
+    }
+
+    .server-content {
+        max-height: calc(100vh - 280px); /* Adjust for mobile to accommodate header and stacked tabs */
+    }
+
+    .server-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .server-tabs {
+        margin-bottom: 0.75rem;
+    }
+
+    .server-actions {
+        justify-content: flex-end;
+    }
+    
+    .delete-all-btn {
+        width: auto;
     }
 
     .server-grid {
