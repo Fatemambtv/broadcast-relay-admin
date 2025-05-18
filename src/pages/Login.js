@@ -3,7 +3,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { ref, set } from "firebase/database";
 import { db, Realtimedb } from "../util/firebase";
 import { Link } from 'react-router-dom';
-import BroadcastIcon from '../assets/icons/BroadcastIcon';
+import novaLogo from '../assets/images/green-logo.png';
 import { RiUserLine, RiLockLine, RiEyeLine, RiEyeOffLine } from 'react-icons/ri';
 import '../styles/index.css';
 
@@ -70,8 +70,8 @@ const Login = ({ onLogin }) => {
     <div className="container">
       <div className="card" style={{ maxWidth: '400px' }}>
         <div className="text-center mb-3">
-          <BroadcastIcon style={{ width: 80, height: 80 }} />
-          <h1 className="title">Broadcast Relay</h1>
+        <img src={novaLogo} alt="Nova Cast" className="nav-logo" aria-label="App logo" />
+          {/* <h1 className="title">Broadcast Relay</h1> */}
           <p className="subtitle">Admin Portal</p>
         </div>
         

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import BroadcastIcon from '../assets/icons/BroadcastIcon';
 import { RiLogoutBoxLine } from 'react-icons/ri';
 import '../styles/index.css';
+import novaLogo from '../assets/images/green-logo.png'; // Update this path to where you'll store the logo
 
 const Navbar = ({ onLogout }) => {
   const location = useLocation();
@@ -20,7 +20,7 @@ const Navbar = ({ onLogout }) => {
 
   return (
     <nav className="navbar">
-      <BroadcastIcon className="nav-logo" aria-label="App logo" />
+      <img src={novaLogo} alt="Nova Cast" className="nav-logo" aria-label="App logo" />
       <div className="nav-links">
         <Link to="/dashboard">
           <button

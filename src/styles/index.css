@@ -1010,3 +1010,8 @@ body {
         padding: 0.4rem;
     }
 }
+
+.nav-logo {
+    height: 70px; /* Adjust as needed */
+    width: auto;
+  }
